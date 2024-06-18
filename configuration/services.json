@@ -1,0 +1,31 @@
+{
+  "goVersion": "go1.22.3",
+  "pythonVersion": "3.12.3",
+  "dockerVersion": "24.0.7",
+  "clusters": [
+    {
+      "name": "mycluster",
+      "agents": 1,
+      "ports": [
+        "30080:30080@agent:0",
+        "30081:30081@agent:0"
+      ],
+      "services": [
+        {
+          "name": "user-service",
+          "image": "dtmintigrationtest/user-service",
+          "tag": "1.0.0",
+          "containerPort": 8080,
+          "nodePort": 30080
+        },
+        {
+          "name": "product-service",
+          "image": "dtmintigrationtest/product-service",
+          "tag": "1.0.0",
+          "containerPort": 8081,
+          "nodePort": 30081
+        }
+      ]
+    }
+  ]
+}
