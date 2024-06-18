@@ -16,7 +16,7 @@ pipeline {
           - name: JENKINS_URL
             value: "http://10.49.74.88:8080/"
           - name: JENKINS_SECRET
-            value: "********"
+            value: "\$(JENKINS_SECRET)"
           - name: JENKINS_AGENT_NAME
             value: "test-pod"
           - name: JENKINS_AGENT_WORKDIR
@@ -80,8 +80,10 @@ pipeline {
 
   post {
     always {
-      cleanWs()
-      echo 'Cleaning workspace'
+      node {
+        cleanWs()
+        echo 'Cleaning workspace'
+      }
     }
   }
 }
