@@ -12,7 +12,7 @@ pipeline {
                     spec:
                       containers:
                       - name: test-container
-                        image: dtmintigrationtest/kubernets-jenkins-config:1.0.0
+                        image: alpine:latest
                         command:
                         - cat
                         tty: true
@@ -36,8 +36,8 @@ pipeline {
             }
             steps {
                 container('test-container') {
-                    echo "test-container"
-                    // git 'https://github.com/prasanthpy36/test_automation.git'
+                    echo "Cloning Repository"
+                    git 'https://github.com/prasanthpy36/test_automation.git'
                 }
             }
         }
@@ -50,8 +50,9 @@ pipeline {
             }
             steps {
                 container('test-container') {
-                    echo "make all"
-                    // sh 'make all'
+                    echo "Running setup and tests"
+                    // Replace the following with the actual setup and test commands
+                    sh 'make all'
                 }
             }
         }
