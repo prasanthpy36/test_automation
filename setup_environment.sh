@@ -65,13 +65,25 @@ install_python() {
     cd Python-"$PYTHON_VERSION" || exit
     ./configure --enable-optimizations --with-ensurepip=install
     make
-    make altinstall
+    sudo make altinstall
+    # Install pip for Python 3.12
+    sudo /usr/local/bin/python3.12 -m ensurepip --upgrade
     cd .. || exit
     rm -rf Python-"$PYTHON_VERSION"
     rm Python-"$PYTHON_VERSION".tgz
     # Set the default Python version to 3.12.3
-    ln -sf /usr/local/bin/python3.12 /usr/bin/python
-    ln -sf /usr/local/bin/pip3.12 /usr/bin/pip3
+    sudo ln -sf /usr/local/bin/python3.12 /usr/bin/python
+    # Check if pip3.12 is installed
+    if ! command -v pip3.12 &> /dev/null
+    then
+        echo "pip3.12 could not be found"
+        # Install pip for Python 3.12
+        sudo /usr/local/bin/python3.12 -m ensurepip --upgrade
+        # Create a symbolic link for pip3.12
+        sudo ln -sf /usr/local/bin/pip3.12 /usr/bin/pip3
+    else
+        echo "pip3.12 is installed"
+    fi
   fi
 }
 
