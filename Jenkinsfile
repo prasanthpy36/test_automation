@@ -3,7 +3,7 @@ pipeline {
     stages {
         stage('Create Pod') {
             agent {
-                kubernetes {
+                 kubernetes {
                     label 'test-pod'
                     defaultContainer 'jnlp'
                     yaml """
@@ -13,16 +13,16 @@ pipeline {
                       containers:
                       - name: test-container
                         image: ubuntu:latest
+                        resources:
+                          requests:
+                            memory: "500Mi"
+                            cpu: "500m"
+                          limits:
+                            memory: "1Gi"
+                            cpu: "1"
                         command:
                         - cat
                         tty: true
-                        volumeMounts:
-                        - name: jenkins-docker-cfg
-                          mountPath: /root/.docker/
-                      volumes:
-                      - name: jenkins-docker-cfg
-                        secret:
-                          secretName: jenkins-docker-cfg
                     """
                 }
             }
