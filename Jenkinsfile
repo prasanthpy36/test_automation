@@ -12,17 +12,24 @@ pipeline {
                     spec:
                       containers:
                       - name: test-container
-                        image: alpine:latest
+                        image: ubuntu:latest
                         command:
                         - cat
                         tty: true
+                        volumeMounts:
+                        - name: jenkins-docker-cfg
+                          mountPath: /root/.docker/
+                      volumes:
+                      - name: jenkins-docker-cfg
+                        secret:
+                          secretName: jenkins-docker-cfg
                     """
                 }
             }
             steps {
                 container('test-container') {
                     script {
-                        echo 'Pod created'
+                        echo 'Pod created with Ubuntu image'
                     }
                 }
             }
@@ -36,8 +43,13 @@ pipeline {
             }
             steps {
                 container('test-container') {
-                    echo "Cloning Repository"
-                    git 'https://github.com/prasanthpy36/test_automation.git'
+                    script {
+                        echo "Cloning Repository"
+                        // Install git if not already installed
+                        sh 'apt-get update && apt-get install -y git'
+                        // Clone the repository
+                        git url: 'https://github.com/prasanthpy36/test_automation.git', branch: 'main'
+                    }
                 }
             }
         }
@@ -50,9 +62,13 @@ pipeline {
             }
             steps {
                 container('test-container') {
-                    echo "Running setup and tests"
-                    // Replace the following with the actual setup and test commands
-                    sh 'make all'
+                    script {
+                        echo "Running setup and tests"
+                        // Install make if not already installed
+                        sh 'apt-get update && apt-get install -y make'
+                        // Run your make command or other setup/test commands
+                        sh 'make all'
+                    }
                 }
             }
         }
