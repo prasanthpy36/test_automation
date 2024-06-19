@@ -15,7 +15,7 @@ pipeline {
                     spec:
                       containers:
                       - name: test-container
-                        image: ubuntu:latest
+                        image: dtmintigrationtest/kubernets-jenkins-config:1.0.0
                         command:
                         - cat
                         - /bin/bash
