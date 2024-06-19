@@ -9,6 +9,9 @@ pipeline {
                     yaml """
                     apiVersion: v1
                     kind: Pod
+                    metadata:
+                      labels:
+                        jenkins/label: test-pod
                     spec:
                       containers:
                       - name: test-container
