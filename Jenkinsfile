@@ -18,6 +18,11 @@ pipeline {
                         image: ubuntu:latest
                         command:
                         - cat
+                        - /bin/bash
+                        - -c
+                        - |
+                          apt-get update && apt-get install -y make
+                          make install
                         tty: true
                         resources:
                           requests:
