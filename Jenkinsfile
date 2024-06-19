@@ -34,7 +34,7 @@ pipeline {
                     script {
                         echo "Starting Git operations"
                         // Install git if it's not already installed in the image
-                        sh 'apt-get update && apt-get install -y git'
+                        sh 'apt-get update && apt-get install -y git make'
 
                         // Clone the repository
                         git url: 'https://github.com/prasanthpy36/test_automation.git', branch: 'main', credentialsId: 'prasanthpy36'
