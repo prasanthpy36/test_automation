@@ -48,7 +48,7 @@ pipeline {
                         // Install git if not already installed
                         sh 'apt-get update && apt-get install -y git'
                         // Clone the repository
-                        git url: 'https://github.com/prasanthpy36/test_automation.git', branch: 'main'
+                        git url: 'https://github.com/prasanthpy36/test_automation.git', branch: 'main', credentialsId: 'prasanthpy36'
                     }
                 }
             }
