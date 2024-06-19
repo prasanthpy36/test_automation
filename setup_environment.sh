@@ -4,27 +4,27 @@ source ./utils.sh
 
 # Function to install jq on Ubuntu
 install_jq_ubuntu() {
-  sudo apt-get update
-  sudo apt-get install -y jq
-  sudo apt-get install -y zlib1g-dev
-  sudo apt-get install -y build-essential libssl-dev libffi-dev libbz2-dev libreadline-dev libsqlite3-dev
+  apt-get update
+  apt-get install -y jq
+  apt-get install -y zlib1g-dev
+  apt-get install -y build-essential libssl-dev libffi-dev libbz2-dev libreadline-dev libsqlite3-dev
 }
 
 # Function to install jq on CentOS
 install_jq_centos() {
-  sudo yum update -y
-  sudo yum install -y jq
-  sudo yum install -y zlib-devel
-  sudo yum groupinstall -y "Development Tools"
-  sudo yum install -y openssl-devel bzip2-devel libffi-devel sqlite-devel
+  yum update -y
+  yum install -y jq
+  yum install -y zlib-devel
+  yum groupinstall -y "Development Tools"
+  yum install -y openssl-devel bzip2-devel libffi-devel sqlite-devel
 }
 
 # Function to install jq on SLES
 install_jq_sles() {
-  sudo zypper refresh
-  sudo zypper install -y jq
-  sudo zypper install -y zlib-devel
-  sudo zypper install -y gcc libopenssl-devel libbz2-devel libffi-devel sqlite3-devel
+  zypper refresh
+  zypper install -y jq
+  zypper install -y zlib-devel
+  zypper install -y gcc libopenssl-devel libbz2-devel libffi-devel sqlite3-devel
 }
 
 # Detect the operating system
@@ -40,11 +40,11 @@ if [ "$OS" == "Linux" ]; then
   elif [[ "$DISTRO" == *"SLES"* ]] || [[ "$DISTRO" == *"SUSE"* ]]; then
     install_jq_sles
   else
-    echo "Unsupported Linux distribution. This script supports Ubuntu and CentOS."
+    echo "Unsupported Linux distribution. This script supports Ubuntu, CentOS, SLES, and SUSE."
     exit 1
   fi
 else
-  echo "Unsupported operating system. This script supports Linux (Ubuntu and CentOS)."
+  echo "Unsupported operating system. This script supports Linux."
   exit 1
 fi
 
@@ -62,15 +62,13 @@ install_python() {
     cd Python-"$PYTHON_VERSION" || exit
     ./configure --enable-optimizations --with-ensurepip=install
     make
-    sudo make altinstall
-    # Install pip for Python 3.12
-    sudo /usr/local/bin/python3.12 -m ensurepip --upgrade
+    make altinstall
     cd .. || exit
     rm -rf Python-"$PYTHON_VERSION"
     rm Python-"$PYTHON_VERSION".tgz
     # Set the default Python version to 3.12.3
-    sudo ln -sf /usr/local/bin/python3.12 /usr/bin/python
-    sudo ln -sf /usr/local/bin/pip3.12 /usr/bin/pip3
+    ln -sf /usr/local/bin/python3.12 /usr/bin/python
+    ln -sf /usr/local/bin/pip3.12 /usr/bin/pip3
   fi
 }
 
@@ -91,22 +89,22 @@ install_docker() {
     if [[ "$DISTRO" == *"SLES"* ]] || [[ "$DISTRO" == *"SUSE"* ]]; then
       DOCKER_VERSION=$(jq -r '.dockerVersion' configuration/services.json)
       ARCH=$(uname -m)
-      sudo mkdir -p /usr/bin/docker
+      mkdir -p /usr/bin/docker
       curl -L https://download.docker.com/linux/static/stable/"${ARCH}"/docker-"${DOCKER_VERSION}".tgz -o docker.tgz
-      sudo tar -xzf docker.tgz -C /usr/bin/docker --strip-components=1
+      tar -xzf docker.tgz -C /usr/bin/docker --strip-components=1
       rm docker.tgz
       # Remove existing symbolic links
-      sudo rm -f /usr/bin/docker /usr/bin/dockerd /usr/bin/docker-init /usr/bin/docker-proxy /usr/bin/containerd /usr/bin/containerd-shim /usr/bin/runc
+      rm -f /usr/bin/docker /usr/bin/dockerd /usr/bin/docker-init /usr/bin/docker-proxy /usr/bin/containerd /usr/bin/containerd-shim /usr/bin/runc
       # Create new symbolic links
-      sudo ln -s /usr/bin/docker/docker /usr/bin/docker
-      sudo ln -s /usr/bin/docker/dockerd /usr/bin/dockerd
-      sudo ln -s /usr/bin/docker/docker-init /usr/bin/docker-init
-      sudo ln -s /usr/bin/docker/docker-proxy /usr/bin/docker-proxy
-      sudo ln -s /usr/bin/docker/containerd /usr/bin/containerd
-      sudo ln -s /usr/bin/docker/containerd-shim /usr/bin/containerd-shim
-      sudo ln -s /usr/bin/docker/runc /usr/bin/runc
+      ln -s /usr/bin/docker/docker /usr/bin/docker
+      ln -s /usr/bin/docker/dockerd /usr/bin/dockerd
+      ln -s /usr/bin/docker/docker-init /usr/bin/docker-init
+      ln -s /usr/bin/docker/docker-proxy /usr/bin/docker-proxy
+      ln -s /usr/bin/docker/containerd /usr/bin/containerd
+      ln -s /usr/bin/docker/containerd-shim /usr/bin/containerd-shim
+      ln -s /usr/bin/docker/runc /usr/bin/runc
       # Create Docker service file
-      sudo tee /etc/systemd/system/docker.service > /dev/null <<EOF
+      tee /etc/systemd/system/docker.service > /dev/null <<EOF
 [Unit]
 Description=Docker Application Container Engine
 Documentation=https://docs.docker.com
@@ -124,15 +122,15 @@ Restart=always
 [Install]
 WantedBy=multi-user.target
 EOF
-      sudo systemctl daemon-reload
-      sudo systemctl enable docker
-      sudo systemctl start docker
+      systemctl daemon-reload
+      systemctl enable docker
+      systemctl start docker
     elif [[ "$DISTRO" == *"Ubuntu"* ]] || [[ "$DISTRO" == *"CentOS"* ]]; then
       if ! curl -fsSL https://get.docker.com -o get-docker.sh; then
         echo "Failed to download Docker installation script."
         exit 1
       fi
-      if ! sudo sh get-docker.sh; then
+      if ! sh get-docker.sh; then
         echo "Failed to install Docker."
         exit 1
       fi
@@ -140,9 +138,9 @@ EOF
       echo "Unsupported Linux distribution. This script supports Ubuntu, CentOS, SLES, and SUSE."
       exit 1
     fi
-    sudo usermod -aG docker "$USER"
-    sudo systemctl enable docker
-    sudo systemctl start docker
+    usermod -aG docker "$USER"
+    systemctl enable docker
+    systemctl start docker
   fi
 }
 
@@ -155,7 +153,7 @@ install_kubectl() {
       exit 1
     fi
     chmod +x ./kubectl
-    sudo mv ./kubectl /usr/local/bin/kubectl
+    mv ./kubectl /usr/local/bin/kubectl
   else
     echo "kubectl is already installed."
   fi
