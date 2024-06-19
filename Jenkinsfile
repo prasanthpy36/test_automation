@@ -37,22 +37,21 @@ pipeline {
             steps {
                 container('test-container') {
                     echo "test-container"
-//                     git 'https://github.com/prasanthpy36/test_automation.git'
+                    // git 'https://github.com/prasanthpy36/test_automation.git'
                 }
             }
         }
         stage('Setup and Test') {
             agent {
                 kubernetes {
-                    echo "kubernetes"
-//                     label 'test-pod'
-//                     defaultContainer 'jnlp'
+                    label 'test-pod'
+                    defaultContainer 'jnlp'
                 }
             }
             steps {
                 container('test-container') {
                     echo "make all"
-//                     sh 'make all'
+                    // sh 'make all'
                 }
             }
         }
