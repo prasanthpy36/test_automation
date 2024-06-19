@@ -8,6 +8,7 @@ install_jq_ubuntu() {
   apt-get install -y jq
   apt-get install -y zlib1g-dev
   apt-get install -y build-essential libssl-dev libffi-dev libbz2-dev libreadline-dev libsqlite3-dev
+  apt-get install -y curl
 }
 
 # Function to install jq on CentOS
@@ -17,6 +18,7 @@ install_jq_centos() {
   yum install -y zlib-devel
   yum groupinstall -y "Development Tools"
   yum install -y openssl-devel bzip2-devel libffi-devel sqlite-devel
+  yum install -y curl
 }
 
 # Function to install jq on SLES
@@ -25,6 +27,7 @@ install_jq_sles() {
   zypper install -y jq
   zypper install -y zlib-devel
   zypper install -y gcc libopenssl-devel libbz2-devel libffi-devel sqlite3-devel
+  zypper install -y curl
 }
 
 # Detect the operating system
