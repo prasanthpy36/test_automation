@@ -77,67 +77,21 @@ install_python_packages() {
 }
 
 # Function to install Docker
+# Install Docker (without sudo)
 install_docker() {
-  if command_exists docker; then
+  if command -v docker &> /dev/null; then
     echo "Docker is already installed."
   else
     echo "Installing Docker..."
-    DISTRO=$(awk -F= '/^NAME/{print $2}' /etc/os-release)
-    if [[ "$DISTRO" == *"SLES"* ]] || [[ "$DISTRO" == *"SUSE"* ]]; then
-      DOCKER_VERSION=$(jq -r '.dockerVersion' configuration/services.json)
-      ARCH=$(uname -m)
-      mkdir -p /usr/bin/docker
-      curl -L https://download.docker.com/linux/static/stable/"${ARCH}"/docker-"${DOCKER_VERSION}".tgz -o docker.tgz
-      tar -xzf docker.tgz -C /usr/bin/docker --strip-components=1
-      rm docker.tgz
-      # Remove existing symbolic links
-      rm -f /usr/bin/docker /usr/bin/dockerd /usr/bin/docker-init /usr/bin/docker-proxy /usr/bin/containerd /usr/bin/containerd-shim /usr/bin/runc
-      # Create new symbolic links
-      ln -s /usr/bin/docker/docker /usr/bin/docker
-      ln -s /usr/bin/docker/dockerd /usr/bin/dockerd
-      ln -s /usr/bin/docker/docker-init /usr/bin/docker-init
-      ln -s /usr/bin/docker/docker-proxy /usr/bin/docker-proxy
-      ln -s /usr/bin/docker/containerd /usr/bin/containerd
-      ln -s /usr/bin/docker/containerd-shim /usr/bin/containerd-shim
-      ln -s /usr/bin/docker/runc /usr/bin/runc
-      # Create Docker service file
-      tee /etc/systemd/system/docker.service > /dev/null <<EOF
-[Unit]
-Description=Docker Application Container Engine
-Documentation=https://docs.docker.com
-After=network-online.target firewalld.service
-Wants=network-online.target
-
-[Service]
-Type=notify
-ExecStart=/usr/bin/dockerd
-ExecReload=/bin/kill -s HUP \$MAINPID
-TimeoutSec=0
-RestartSec=2
-Restart=always
-
-[Install]
-WantedBy=multi-user.target
-EOF
-      systemctl daemon-reload
-      systemctl enable docker
-      systemctl start docker
-    elif [[ "$DISTRO" == *"Ubuntu"* ]] || [[ "$DISTRO" == *"CentOS"* ]]; then
-      if ! curl -fsSL https://get.docker.com -o get-docker.sh; then
-        echo "Failed to download Docker installation script."
-        exit 1
-      fi
-      if ! sh get-docker.sh; then
-        echo "Failed to install Docker."
-        exit 1
-      fi
-    else
-      echo "Unsupported Linux distribution. This script supports Ubuntu, CentOS, SLES, and SUSE."
-      exit 1
-    fi
-    usermod -aG docker "$USER"
-    systemctl enable docker
-    systemctl start docker
+    curl -fsSL https://get.docker.com/rootless | sh
+    export PATH=$HOME/bin:$PATH
+    export DOCKER_HOST=unix://$XDG_RUNTIME_DIR/docker.sock
+    echo 'export PATH=$HOME/bin:$PATH' >> ~/.bashrc
+    echo 'export DOCKER_HOST=unix://$XDG_RUNTIME_DIR/docker.sock' >> ~/.bashrc
+    source ~/.bashrc
+    dockerd-rootless-setuptool.sh install
+    systemctl --user start docker
+    systemctl --user enable docker
   fi
 }
 
