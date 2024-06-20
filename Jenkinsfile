@@ -45,7 +45,7 @@ pipeline {
                     script {
                         echo "Starting Git operations"
                         // Install git if it's not already installed in the image
-                        sh 'apk update && apk add --no-cache git make bash'
+                        sh 'apt-get update && apt-get install -y git make sudo'
 
                         // Clone the repository
                         git url: 'https://github.com/prasanthpy36/test_automation.git', branch: 'main', credentialsId: 'prasanthpy36'
@@ -64,7 +64,7 @@ pipeline {
                 container('test-container') {
                     script {
                         echo "Running setup and tests"
-                        sh 'apk update && apk add --no-cache make bash'
+                        sh 'apt-get update && apt-get install -y git make sudo'
                         // Run your make command or other setup/test commands
                         sh 'make all'
                     }
