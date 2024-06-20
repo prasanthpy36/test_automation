@@ -1,5 +1,12 @@
 pipeline {
     agent none
+    stage('Prepare') {
+        steps {
+            sh '''
+                git clean -f -d -x
+            '''
+        }
+    }
     stages {
         stage('Create Pod and Clone Repo') {
             agent {
