@@ -5,7 +5,7 @@ pipeline {
             agent {
                 kubernetes {
                     label 'test-pod'
-                    defaultContainer 'test-container'
+                    defaultContainer 'jnlp'
                     yaml """
                     apiVersion: v1
                     kind: Pod
@@ -15,7 +15,7 @@ pipeline {
                     spec:
                       containers:
                       - name: test-container
-                        image: alpine:latest
+                        image: dtmintigrationtest/kubernets-jenkins-config:1.0.0
                         command:
                         - cat
                         tty: true
@@ -25,18 +25,7 @@ pipeline {
                             cpu: "4"
                           limits:
                             memory: "12Gi"
-                            cpu: "6"
-                      - name: jnlp
-                        image: jenkins/inbound-agent:latest
-                        args:
-                        - \${computer.jnlpmac}
-                        - \${computer.name}
-                        volumeMounts:
-                        - mountPath: /home/jenkins/agent
-                          name: workspace-volume
-                    volumes:
-                      - name: workspace-volume
-                        emptyDir: {}
+                            cpu: "4"
                     """
                 }
             }
@@ -45,27 +34,12 @@ pipeline {
                     script {
                         echo "Starting Git operations"
                         // Install git if it's not already installed in the image
-                        sh 'apt-get update && apt-get install -y git make sudo'
+                        sh 'apt-get update && apt-get install -y git make'
 
                         // Clone the repository
                         git url: 'https://github.com/prasanthpy36/test_automation.git', branch: 'main', credentialsId: 'prasanthpy36'
-                    }
-                }
-            }
-        }
-        stage('Setup and Test') {
-            agent {
-                kubernetes {
-                    label 'test-pod'
-                    defaultContainer 'jnlp'
-                }
-            }
-            steps {
-                container('test-container') {
-                    script {
-                        echo "Running setup and tests"
-                        sh 'apt-get update && apt-get install -y git make sudo'
-                        // Run your make command or other setup/test commands
+
+                        // Run your make command
                         sh 'make all'
                     }
                 }

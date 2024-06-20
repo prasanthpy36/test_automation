@@ -1,11 +1,11 @@
-FROM alpine:latest
+FROM ubuntu:20.04
 
 # Install dependencies
-RUN apk update && \
-    apk add --no-cache curl jq kubectl git make bash
+RUN apt-get update && \
+    apt-get install -y curl jq kubectl git make
 
 # Install k3d
-RUN wget -q -O - https://raw.githubusercontent.com/k3d-io/k3d/main/install.sh | bash
+RUN curl -s https://raw.githubusercontent.com/rancher/k3d/main/install.sh | bash
 
 # Set working directory
 WORKDIR /app
