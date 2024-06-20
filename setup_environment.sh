@@ -51,28 +51,30 @@ else
   exit 1
 fi
 
-# Function to install pyenv
-install_pyenv() {
+# Function to install a specific version of Python using pyenv
+install_python() {
+  PYTHON_VERSION=$(jq -r '.pythonVersion' configuration/services.json)
+  echo "Checking if Python $PYTHON_VERSION is installed..."
   if command -v pyenv &> /dev/null; then
-    echo "pyenv is already installed."
+    if pyenv versions | grep -q "$PYTHON_VERSION"; then
+      echo "Python $PYTHON_VERSION is already installed."
+    else
+      echo "Python $PYTHON_VERSION is not installed. Installing..."
+      curl https://pyenv.run | bash
+      export PATH="$HOME/.pyenv/bin:$PATH"
+      eval "$(pyenv init --path)"
+      eval "$(pyenv init -)"
+      eval "$(pyenv virtualenv-init -)"
+      pyenv install "$PYTHON_VERSION"
+      pyenv global "$PYTHON_VERSION"
+    fi
   else
-    echo "pyenv is not installed. Installing pyenv..."
+    echo "pyenv is not installed. Installing pyenv first..."
     curl https://pyenv.run | bash
     export PATH="$HOME/.pyenv/bin:$PATH"
     eval "$(pyenv init --path)"
     eval "$(pyenv init -)"
     eval "$(pyenv virtualenv-init -)"
-  fi
-}
-
-# Function to install a specific version of Python using pyenv
-install_python() {
-  PYTHON_VERSION=$(jq -r '.pythonVersion' configuration/services.json)
-  echo "Checking if Python $PYTHON_VERSION is installed..."
-  if pyenv versions | grep -q "$PYTHON_VERSION"; then
-    echo "Python $PYTHON_VERSION is already installed."
-  else
-    echo "Python $PYTHON_VERSION is not installed. Installing..."
     pyenv install "$PYTHON_VERSION"
     pyenv global "$PYTHON_VERSION"
   fi
@@ -110,11 +112,8 @@ install_docker_rootless() {
     export PATH=$HOME/bin:$PATH
     export DOCKER_HOST=unix://$XDG_RUNTIME_DIR/docker.sock
 
-    # Run the Docker rootless setup tool
-    dockerd-rootless-setuptool.sh install
-
     # Start Docker daemon in rootless mode manually
-    dockerd-rootless.sh --experimental --storage-driver=fuse-overlayfs &
+    nohup docker daemon-rootless.sh --experimental &>/dev/null &
     sleep 5
 
     echo "Docker rootless mode installed successfully."
@@ -158,7 +157,6 @@ install_k3d() {
 install_docker_rootless
 install_kubectl
 install_k3d
-install_pyenv
 install_python
 install_python_packages
 
