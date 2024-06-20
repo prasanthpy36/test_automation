@@ -15,7 +15,7 @@ pipeline {
                     spec:
                       containers:
                       - name: test-container
-                        image: ubuntu:20.04
+                        image: alpine:latest
                         command:
                         - cat
                         tty: true
@@ -34,10 +34,17 @@ pipeline {
                     script {
                         echo "Starting Git operations"
                         // Install git if it's not already installed in the image
-                        sh 'apt-get update && apt-get install -y git make sudo'
+                        sh 'apt-get update && apt-get install -y git make'
 
-                        // Clone the repository
-                        git url: 'https://github.com/prasanthpy36/test_automation.git', branch: 'main', credentialsId: 'prasanthpy36'
+                        // Clone all branches of the repository
+                        checkout([
+                            $class: 'GitSCM',
+                            branches: [[name: '**']],
+                            doGenerateSubmoduleConfigurations: false,
+                            extensions: [],
+                            submoduleCfg: [],
+                            userRemoteConfigs: [[url: 'https://github.com/prasanthpy36/test_automation.git', credentialsId: 'prasanthpy36']]
+                        ])
 
                         // Run your make command
                         sh 'make all'
