@@ -1,13 +1,6 @@
 pipeline {
     agent none
     stages {
-        stage('Prepare') {
-            steps {
-                sh '''
-                    git clean -f -d -x
-                '''
-            }
-        }
         stage('Create Pod and Clone Repo') {
             agent {
                 kubernetes {
