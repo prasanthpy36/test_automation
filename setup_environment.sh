@@ -77,23 +77,32 @@ install_python_packages() {
 }
 
 # Function to install Docker
-# Install Docker (without sudo)
 install_docker() {
   if command -v docker &> /dev/null; then
     echo "Docker is already installed."
   else
     echo "Installing Docker..."
+
+    # Ensure dependencies are installed
+    sudo yum install -y slirp4netns fuse-overlayfs iptables
+
+    # Install Docker rootless mode
     curl -fsSL https://get.docker.com/rootless | sh
-    export PATH=$HOME/bin:$PATH
-    export DOCKER_HOST=unix://$XDG_RUNTIME_DIR/docker.sock
+
+    # Set environment variables
     echo 'export PATH=$HOME/bin:$PATH' >> ~/.bashrc
     echo 'export DOCKER_HOST=unix://$XDG_RUNTIME_DIR/docker.sock' >> ~/.bashrc
     source ~/.bashrc
+
+    # Run the Docker rootless setup tool
     dockerd-rootless-setuptool.sh install
+
+    # Start Docker daemon in rootless mode
     systemctl --user start docker
     systemctl --user enable docker
   fi
 }
+
 
 # Install kubectl
 install_kubectl() {
