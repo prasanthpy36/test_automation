@@ -12,7 +12,7 @@ do
   {
     echo "====================================="
     echo "Running tests in $file..."
-    /usr/local/bin/python3.12 -m pytest "$file"
+    python3.12 -m pytest "$file"
     echo "====================================="
   } >> "$TEST_REPORT"
 done
