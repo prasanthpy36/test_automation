@@ -51,47 +51,29 @@ else
   exit 1
 fi
 
-# Function to install a specific version of Python
+# Function to install a specific version of Python using pyenv
 install_python() {
   PYTHON_VERSION=$(jq -r '.pythonVersion' configuration/services.json)
   echo "Checking if Python $PYTHON_VERSION is installed..."
-  INSTALLED_PYTHON_VERSION=$(python3.12 -V 2>&1)
-  if [ "$INSTALLED_PYTHON_VERSION" == "Python $PYTHON_VERSION" ]; then
+  if pyenv versions | grep -q "$PYTHON_VERSION"; then
     echo "Python $PYTHON_VERSION is already installed."
   else
     echo "Python $PYTHON_VERSION is not installed. Installing..."
-    curl -O https://www.python.org/ftp/python/"$PYTHON_VERSION"/Python-"$PYTHON_VERSION".tgz
-    tar -xzvf Python-"$PYTHON_VERSION".tgz
-    cd Python-"$PYTHON_VERSION" || exit
-    ./configure --enable-optimizations --with-ensurepip=install
-    make
-    sudo make altinstall
-    # Install pip for Python 3.12
-    sudo /usr/local/bin/python3.12 -m ensurepip --upgrade
-    cd .. || exit
-    rm -rf Python-"$PYTHON_VERSION"
-    rm Python-"$PYTHON_VERSION".tgz
-    # Set the default Python version to 3.12.3
-    sudo ln -sf /usr/local/bin/python3.12 /usr/bin/python
-    # Check if pip3.12 is installed
-    if ! command -v pip3.12 &> /dev/null
-    then
-        echo "pip3.12 could not be found"
-        # Install pip for Python 3.12
-        sudo /usr/local/bin/python3.12 -m ensurepip --upgrade
-        # Create a symbolic link for pip3.12
-        sudo ln -sf /usr/local/bin/pip3.12 /usr/bin/pip3
-    else
-        echo "pip3.12 is installed"
-    fi
+    curl https://pyenv.run | bash
+    export PATH="$HOME/.pyenv/bin:$PATH"
+    eval "$(pyenv init --path)"
+    eval "$(pyenv init -)"
+    eval "$(pyenv virtualenv-init -)"
+    pyenv install "$PYTHON_VERSION"
+    pyenv global "$PYTHON_VERSION"
   fi
 }
 
-# Install Python packages
+# Install Python packages locally
 install_python_packages() {
   echo "Installing Python packages from requirements.txt..."
-  /usr/local/bin/python3.12 -m pip install --upgrade pip
-  /usr/local/bin/python3.12 -m pip install -r requirements.txt
+  pip install --upgrade pip
+  pip install -r requirements.txt
 }
 
 # Function to install Docker
@@ -201,4 +183,4 @@ kubectl version --client
 k3d version
 jq --version
 python3.12 --version
-pip3 --version
+pip --version
