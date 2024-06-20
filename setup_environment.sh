@@ -76,7 +76,7 @@ install_python_packages() {
   pip install -r requirements.txt
 }
 
-# Function to install Docker
+# Function to install Docker in rootless mode
 install_docker() {
   if command -v docker &> /dev/null; then
     echo "Docker is already installed."
@@ -84,7 +84,7 @@ install_docker() {
     echo "Installing Docker..."
 
     # Ensure dependencies are installed
-    sudo yum install -y slirp4netns fuse-overlayfs iptables
+    yum install -y slirp4netns fuse-overlayfs iptables
 
     # Install Docker rootless mode
     curl -fsSL https://get.docker.com/rootless | sh
@@ -100,9 +100,15 @@ install_docker() {
     # Start Docker daemon in rootless mode
     systemctl --user start docker
     systemctl --user enable docker
+
+    echo "Docker rootless mode installed successfully."
   fi
 }
 
+# Function to check if a command exists
+command_exists() {
+  command -v "$1" &> /dev/null
+}
 
 # Install kubectl
 install_kubectl() {
