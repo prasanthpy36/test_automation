@@ -18,11 +18,6 @@ pipeline {
                         image: dtmintigrationtest/kubernets-jenkins-config:1.0.0
                         command:
                         - cat
-                        - /bin/bash
-                        - -c
-                        - |
-                          apt-get update && apt-get install -y make
-                          make install
                         tty: true
                         resources:
                           requests:
@@ -39,7 +34,7 @@ pipeline {
                     script {
                         echo "Starting Git operations"
                         // Install git if it's not already installed in the image
-                        sh 'apt-get update && apt-get install -y git make'
+                        sh 'apk update && apk add --no-cache git make bash'
 
                         // Clone the repository
                         git url: 'https://github.com/prasanthpy36/test_automation.git', branch: 'main', credentialsId: 'prasanthpy36'
@@ -58,32 +53,7 @@ pipeline {
                 container('test-container') {
                     script {
                         echo "Running setup and tests"
-                        sh 'apt-get update && apt-get install -y git make sudo'
-                        // Install Docker
-                        sh '''
-                        if ! command -v docker &> /dev/null
-                        then
-                            echo "Docker is not installed. Installing Docker..."
-                            sudo apt-get update
-                            sudo apt-get install -y apt-transport-https ca-certificates curl software-properties-common
-                            curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
-                            sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
-                            sudo apt-get update
-                            sudo apt-get install -y docker-ce
-                            if [[ $(ps -p 1 -o comm=) == "systemd" ]]; then
-                                sudo systemctl enable docker
-                                sudo systemctl start docker
-                                sudo usermod -aG docker "$(whoami)"
-                                sudo systemctl stop docker
-                                sudo systemctl start docker
-                            else
-                                echo "System does not use systemd. Docker service will not be managed with systemd commands."
-                                sudo usermod -aG docker "$(whoami)"
-                            fi
-                        else
-                            echo "Docker is already installed."
-                        fi
-                        '''
+                        sh 'apk update && apk add --no-cache make bash'
                         // Run your make command or other setup/test commands
                         sh 'make all'
                     }
