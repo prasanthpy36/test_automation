@@ -34,7 +34,7 @@ pipeline {
                     script {
                         echo "Starting Git operations"
                         // Install git if it's not already installed in the image
-                        sh 'apt-get update && apt-get install -y git make'
+                        sh 'apk update && apk add --no-cache make bash'
 
                         // Clone all branches of the repository
                         checkout([
