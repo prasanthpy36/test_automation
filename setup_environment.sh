@@ -117,6 +117,15 @@ install_docker() {
       sudo usermod -aG docker "$(whoami)"
     fi
   fi
+
+  # Check if Docker daemon is running
+  if ! systemctl is-active --quiet docker; then
+    echo "Starting Docker daemon..."
+    sudo systemctl start docker
+  fi
+
+  # Add the current user to the docker group
+  sudo usermod -aG docker "$(whoami)"
 }
 
 # Function to check if a command exists

@@ -55,6 +55,18 @@ pipeline {
 
                         // Run your make command
                         sh 'make all'
+
+                        // Check Docker socket file
+                        echo "Checking Docker socket file..."
+                        sh 'ls -l /var/run/docker.sock'
+
+                        // Check Docker version
+                        echo "Checking Docker version..."
+                        sh 'docker version'
+
+                        // Check user permissions
+                        echo "Checking user permissions..."
+                        sh 'id'
                     }
                 }
             }
