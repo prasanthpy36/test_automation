@@ -58,7 +58,7 @@ pipeline {
                 container('test-container') {
                     script {
                         echo "Running setup and tests"
-                        sh 'apt-get update && apt-get install -y git make'
+                        sh 'apt-get update && apt-get install -y git make sudo'
                         // Run your make command or other setup/test commands
                         sh 'make all'
                     }

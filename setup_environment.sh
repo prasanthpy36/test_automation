@@ -8,7 +8,7 @@ install_jq_ubuntu() {
   apt-get install -y jq
   apt-get install -y zlib1g-dev
   apt-get install -y build-essential libssl-dev libffi-dev libbz2-dev libreadline-dev libsqlite3-dev
-  apt-get install -y curl
+  apt-get install -y curl sudo
 }
 
 # Function to install jq on CentOS
@@ -18,7 +18,7 @@ install_jq_centos() {
   yum install -y zlib-devel
   yum groupinstall -y "Development Tools"
   yum install -y openssl-devel bzip2-devel libffi-devel sqlite-devel
-  yum install -y curl
+  yum install -y curl sudo
 }
 
 # Function to install jq on SLES
@@ -27,7 +27,7 @@ install_jq_sles() {
   zypper install -y jq
   zypper install -y zlib-devel
   zypper install -y gcc libopenssl-devel libbz2-devel libffi-devel sqlite3-devel
-  zypper install -y curl
+  zypper install -y curl sudo
 }
 
 # Detect the operating system
@@ -88,35 +88,67 @@ install_python_packages() {
 }
 
 # Function to install Docker in rootless mode without systemctl
-install_docker_rootless() {
-  if command -v docker &> /dev/null; then
+install_docker() {
+  if command_exists docker; then
     echo "Docker is already installed."
   else
     echo "Installing Docker..."
+    DISTRO=$(awk -F= '/^NAME/{print $2}' /etc/os-release)
+    if [[ "$DISTRO" == *"SLES"* ]] || [[ "$DISTRO" == *"SUSE"* ]]; then
+      DOCKER_VERSION=$(jq -r '.dockerVersion' configuration/services.json)
+      ARCH=$(uname -m)
+      sudo mkdir -p /usr/bin/docker
+      curl -L https://download.docker.com/linux/static/stable/"${ARCH}"/docker-"${DOCKER_VERSION}".tgz -o docker.tgz
+      sudo tar -xzf docker.tgz -C /usr/bin/docker --strip-components=1
+      rm docker.tgz
+      # Remove existing symbolic links
+      sudo rm -f /usr/bin/docker /usr/bin/dockerd /usr/bin/docker-init /usr/bin/docker-proxy /usr/bin/containerd /usr/bin/containerd-shim /usr/bin/runc
+      # Create new symbolic links
+      sudo ln -s /usr/bin/docker/docker /usr/bin/docker
+      sudo ln -s /usr/bin/docker/dockerd /usr/bin/dockerd
+      sudo ln -s /usr/bin/docker/docker-init /usr/bin/docker-init
+      sudo ln -s /usr/bin/docker/docker-proxy /usr/bin/docker-proxy
+      sudo ln -s /usr/bin/docker/containerd /usr/bin/containerd
+      sudo ln -s /usr/bin/docker/containerd-shim /usr/bin/containerd-shim
+      sudo ln -s /usr/bin/docker/runc /usr/bin/runc
+      # Create Docker service file
+      sudo tee /etc/systemd/system/docker.service > /dev/null <<EOF
+[Unit]
+Description=Docker Application Container Engine
+Documentation=https://docs.docker.com
+After=network-online.target firewalld.service
+Wants=network-online.target
 
-    # Ensure dependencies are installed
-    if command -v yum &> /dev/null; then
-      yum install -y slirp4netns fuse-overlayfs iptables
-    elif command -v apt-get &> /dev/null; then
-      apt-get update
-      apt-get install -y slirp4netns fuse-overlayfs iptables
+[Service]
+Type=notify
+ExecStart=/usr/bin/dockerd
+ExecReload=/bin/kill -s HUP \$MAINPID
+TimeoutSec=0
+RestartSec=2
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+EOF
+      sudo systemctl daemon-reload
+      sudo systemctl enable docker
+      sudo systemctl start docker
+    elif [[ "$DISTRO" == *"Ubuntu"* ]] || [[ "$DISTRO" == *"CentOS"* ]]; then
+      if ! curl -fsSL https://get.docker.com -o get-docker.sh; then
+        echo "Failed to download Docker installation script."
+        exit 1
+      fi
+      if ! sudo sh get-docker.sh; then
+        echo "Failed to install Docker."
+        exit 1
+      fi
     else
-      echo "Unsupported package manager. Please install slirp4netns, fuse-overlayfs, and iptables manually."
+      echo "Unsupported Linux distribution. This script supports Ubuntu, CentOS, SLES, and SUSE."
       exit 1
     fi
-
-    # Install Docker rootless mode
-    curl -fsSL https://get.docker.com/rootless | sh
-
-    # Set environment variables
-    export PATH=$HOME/bin:$PATH
-    export DOCKER_HOST=unix://$XDG_RUNTIME_DIR/docker.sock
-
-    # Start Docker daemon in rootless mode manually
-    nohup docker daemon-rootless.sh --experimental &>/dev/null &
-    sleep 5
-
-    echo "Docker rootless mode installed successfully."
+    sudo usermod -aG docker "$USER"
+    sudo systemctl enable docker
+    sudo systemctl start docker
   fi
 }
 
@@ -154,7 +186,7 @@ install_k3d() {
 }
 
 # Call the installation functions
-install_docker_rootless
+install_docker
 install_kubectl
 install_k3d
 install_python
