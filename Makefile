@@ -3,14 +3,14 @@ GENERATED_DIR := services/processed
 TEST_REPORT := test_report.txt
 
 # Default target
-setup: install-tools create-clusters generate-yamls deploy wait-for-pods
+setup: create-clusters generate-yamls deploy wait-for-pods
 all: setup test
 
 # Target to install tools
-install-tools:
-	@echo "Running setup_environment.sh script..."
-	@chmod +x setup_environment.sh
-	@./setup_environment.sh
+#install-tools:
+#	@echo "Running setup_environment.sh script..."
+#	@chmod +x setup_environment.sh
+#	@./setup_environment.sh
 
 # Target to create k3d clusters
 create-clusters: install-tools
