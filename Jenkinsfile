@@ -26,11 +26,11 @@ pipeline {
                         tty: true
                         resources:
                           requests:
-                            memory: "500Mi"
-                            cpu: "500m"
+                            memory: "8Gi"
+                            cpu: "4"
                           limits:
-                            memory: "1Gi"
-                            cpu: "1"
+                            memory: "12Gi"
+                            cpu: "6"
                     """
                 }
             }
