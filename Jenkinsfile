@@ -26,6 +26,13 @@ pipeline {
                           limits:
                             memory: "12Gi"
                             cpu: "4"
+                        volumeMounts:
+                        - mountPath: /var/run/docker.sock
+                          name: docker-sock
+                      volumes:
+                      - name: docker-sock
+                        hostPath:
+                          path: /var/run/docker.sock
                     """
                 }
             }
