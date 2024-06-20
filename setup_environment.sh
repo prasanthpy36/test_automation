@@ -87,7 +87,6 @@ install_python_packages() {
   pip install -r requirements.txt
 }
 
-# Function to install Docker
 install_docker() {
   if command_exists docker; then
     echo "Docker is already installed."
@@ -99,11 +98,16 @@ install_docker() {
     sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
     sudo apt-get update
     sudo apt-get install -y docker-ce
-    sudo systemctl enable docker
-    sudo systemctl start docker
-    sudo usermod -aG docker "$USER"
-    sudo systemctl stop docker
-    sudo systemctl start docker
+    if [[ $(ps -p 1 -o comm=) == "systemd" ]]; then
+      sudo systemctl enable docker
+      sudo systemctl start docker
+      sudo usermod -aG docker "$(whoami)"
+      sudo systemctl stop docker
+      sudo systemctl start docker
+    else
+      echo "System does not use systemd. Docker service will not be managed with systemd commands."
+      sudo usermod -aG docker "$(whoami)"
+    fi
   fi
 }
 
