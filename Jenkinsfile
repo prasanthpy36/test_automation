@@ -15,7 +15,7 @@ pipeline {
                     spec:
                       containers:
                       - name: test-container
-                        image: dtmintigrationtest/kubernets-jenkins-config:3.0.0
+                        image: ubuntu:20.04
                         command:
                         - cat
                         tty: true
