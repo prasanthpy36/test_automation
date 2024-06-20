@@ -4,7 +4,7 @@ source ./utils.sh
 
 # Function to install jq on Ubuntu
 install_jq_ubuntu() {
-#  apt-get update
+  apt-get update
   apt-get install -y jq
   apt-get install -y zlib1g-dev
   apt-get install -y build-essential libssl-dev libffi-dev libbz2-dev libreadline-dev libsqlite3-dev
@@ -87,29 +87,29 @@ install_python_packages() {
   pip install -r requirements.txt
 }
 
-#install_docker() {
-#  if command_exists docker; then
-#    echo "Docker is already installed."
-#  else
-#    echo "Installing Docker..."
-#    sudo apt-get update
-#    sudo apt-get install -y apt-transport-https ca-certificates curl software-properties-common
-#    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
-#    sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
-#    sudo apt-get update
-#    sudo apt-get install -y docker-ce
-#    if [[ $(ps -p 1 -o comm=) == "systemd" ]]; then
-#      sudo systemctl enable docker
-#      sudo systemctl start docker
-#      sudo usermod -aG docker "$(whoami)"
-#      sudo systemctl stop docker
-#      sudo systemctl start docker
-#    else
-#      echo "System does not use systemd. Docker service will not be managed with systemd commands."
-#      sudo usermod -aG docker "$(whoami)"
-#    fi
-#  fi
-#}
+install_docker() {
+  if command_exists docker; then
+    echo "Docker is already installed."
+  else
+    echo "Installing Docker..."
+    sudo apt-get update
+    sudo apt-get install -y apt-transport-https ca-certificates curl software-properties-common
+    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+    sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+    sudo apt-get update
+    sudo apt-get install -y docker-ce
+    if [[ $(ps -p 1 -o comm=) == "systemd" ]]; then
+      sudo systemctl enable docker
+      sudo systemctl start docker
+      sudo usermod -aG docker "$(whoami)"
+      sudo systemctl stop docker
+      sudo systemctl start docker
+    else
+      echo "System does not use systemd. Docker service will not be managed with systemd commands."
+      sudo usermod -aG docker "$(whoami)"
+    fi
+  fi
+}
 
 # Function to check if a command exists
 command_exists() {
@@ -145,7 +145,7 @@ install_k3d() {
 }
 
 # Call the installation functions
-#install_docker
+install_docker
 install_kubectl
 install_k3d
 install_python
@@ -153,7 +153,7 @@ install_python_packages
 
 # Verify installations
 echo "Verifying installations:"
-#docker --version
+docker --version
 kubectl version --client
 k3d version
 jq --version
