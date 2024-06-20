@@ -87,29 +87,29 @@ install_python_packages() {
   pip install -r requirements.txt
 }
 
-install_docker() {
-  if command_exists docker; then
-    echo "Docker is already installed."
-  else
-    echo "Installing Docker..."
-    sudo apt-get update
-    sudo apt-get install -y apt-transport-https ca-certificates curl software-properties-common
-    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
-    sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
-    sudo apt-get update
-    sudo apt-get install -y docker-ce
-    if [[ $(ps -p 1 -o comm=) == "systemd" ]]; then
-      sudo systemctl enable docker
-      sudo systemctl start docker
-      sudo usermod -aG docker "$(whoami)"
-      sudo systemctl stop docker
-      sudo systemctl start docker
-    else
-      echo "System does not use systemd. Docker service will not be managed with systemd commands."
-      sudo usermod -aG docker "$(whoami)"
-    fi
-  fi
-}
+#install_docker() {
+#  if command_exists docker; then
+#    echo "Docker is already installed."
+#  else
+#    echo "Installing Docker..."
+#    sudo apt-get update
+#    sudo apt-get install -y apt-transport-https ca-certificates curl software-properties-common
+#    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+#    sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+#    sudo apt-get update
+#    sudo apt-get install -y docker-ce
+#    if [[ $(ps -p 1 -o comm=) == "systemd" ]]; then
+#      sudo systemctl enable docker
+#      sudo systemctl start docker
+#      sudo usermod -aG docker "$(whoami)"
+#      sudo systemctl stop docker
+#      sudo systemctl start docker
+#    else
+#      echo "System does not use systemd. Docker service will not be managed with systemd commands."
+#      sudo usermod -aG docker "$(whoami)"
+#    fi
+#  fi
+#}
 
 # Function to check if a command exists
 command_exists() {
@@ -153,7 +153,7 @@ install_python_packages
 
 # Verify installations
 echo "Verifying installations:"
-docker --version
+#docker --version
 kubectl version --client
 k3d version
 jq --version
