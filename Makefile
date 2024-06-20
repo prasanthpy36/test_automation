@@ -14,6 +14,8 @@ install-tools:
 
 # Target to create k3d clusters
 create-clusters: install-tools
+	@echo "Starting Docker service..."
+	@sudo systemctl start docker
 	@echo "Creating k3d clusters from configuration..."
 	@chmod +x scripts/cluster/create_clusters.sh
 	@scripts/cluster/create_clusters.sh $(CONFIG_FILE)
