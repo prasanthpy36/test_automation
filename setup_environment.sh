@@ -84,7 +84,15 @@ install_docker() {
     echo "Installing Docker..."
 
     # Ensure dependencies are installed
-    yum install -y slirp4netns fuse-overlayfs iptables
+    if command -v yum &> /dev/null; then
+      yum install -y slirp4netns fuse-overlayfs iptables
+    elif command -v apt-get &> /dev/null; then
+      apt-get update
+      apt-get install -y slirp4netns fuse-overlayfs iptables
+    else
+      echo "Unsupported package manager. Please install slirp4netns, fuse-overlayfs, and iptables manually."
+      exit 1
+    fi
 
     # Install Docker rootless mode
     curl -fsSL https://get.docker.com/rootless | sh
