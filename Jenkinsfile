@@ -29,8 +29,14 @@ pipeline {
                       - name: jnlp
                         image: jenkins/inbound-agent:latest
                         args:
-                        - ${computer.jnlpmac}
-                        - ${computer.name}
+                        - \${computer.jnlpmac}
+                        - \${computer.name}
+                        volumeMounts:
+                        - mountPath: /home/jenkins/agent
+                          name: workspace-volume
+                    volumes:
+                      - name: workspace-volume
+                        emptyDir: {}
                     """
                 }
             }
@@ -51,7 +57,7 @@ pipeline {
             agent {
                 kubernetes {
                     label 'test-pod'
-                    defaultContainer 'test-container'
+                    defaultContainer 'jnlp'
                 }
             }
             steps {
