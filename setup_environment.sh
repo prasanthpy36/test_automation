@@ -2,6 +2,14 @@
 
 source ./utils.sh
 
+# Function to install jq on Alpine
+install_jq_alpine() {
+  sudo apk update
+  sudo apk add jq
+  sudo apk add zlib-dev
+  sudo apk add build-base openssl-dev libffi-dev bzip2-dev readline-dev sqlite-dev
+}
+
 # Function to install jq on Ubuntu
 install_jq_ubuntu() {
   apt-get update
@@ -116,6 +124,17 @@ command_exists() {
   command -v "$1" &> /dev/null
 }
 
+# Function to install Docker on Alpine
+install_docker_alpine() {
+  sudo apk update
+  sudo apk add docker
+  sudo rc-update add docker boot
+}
+# Function to install Python on Alpine
+install_python_alpine() {
+  sudo apk update
+  sudo apk add python3 py3-pip
+}
 # Install kubectl
 install_kubectl() {
   if ! command_exists kubectl; then
