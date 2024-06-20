@@ -145,7 +145,7 @@ install_k3d() {
 }
 
 # Call the installation functions
-install_docker
+#install_docker
 install_kubectl
 install_k3d
 install_python
