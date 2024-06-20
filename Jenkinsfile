@@ -5,7 +5,7 @@ pipeline {
             agent {
                 kubernetes {
                     label 'test-pod'
-                    defaultContainer 'jnlp'
+                    defaultContainer 'test-container'
                     yaml """
                     apiVersion: v1
                     kind: Pod
@@ -26,6 +26,11 @@ pipeline {
                           limits:
                             memory: "12Gi"
                             cpu: "6"
+                      - name: jnlp
+                        image: jenkins/inbound-agent:latest
+                        args:
+                        - ${computer.jnlpmac}
+                        - ${computer.name}
                     """
                 }
             }
@@ -46,7 +51,7 @@ pipeline {
             agent {
                 kubernetes {
                     label 'test-pod'
-                    defaultContainer 'jnlp'
+                    defaultContainer 'test-container'
                 }
             }
             steps {
