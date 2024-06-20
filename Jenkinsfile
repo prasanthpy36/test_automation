@@ -15,7 +15,7 @@ pipeline {
                     spec:
                       containers:
                       - name: test-container
-                        image: dtmintigrationtest/kubernets-jenkins-config:1.0.0
+                        image: dtmintigrationtest/kubernets-jenkins-config:1.2.0
                         command:
                         - cat
                         tty: true
@@ -34,7 +34,7 @@ pipeline {
                     script {
                         echo "Starting Git operations"
                         // Install git if it's not already installed in the image
-                        sh 'apt-get update && apt-get install -y git make'
+                        sh 'apt-get update && apt-get install -y git make sudo'
 
                         // Clone the repository
                         git url: 'https://github.com/prasanthpy36/test_automation.git', branch: 'main', credentialsId: 'prasanthpy36'

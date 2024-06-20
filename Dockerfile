@@ -2,7 +2,7 @@ FROM ubuntu:20.04
 
 # Install dependencies
 RUN apt-get update && \
-    apt-get install -y curl jq kubectl git make
+    apt-get install -y curl jq git make
 
 # Install k3d
 RUN curl -s https://raw.githubusercontent.com/rancher/k3d/main/install.sh | bash
