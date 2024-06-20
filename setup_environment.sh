@@ -201,4 +201,4 @@ kubectl version --client
 k3d version
 jq --version
 python3.12 --version
-pip3.12 --version
+pip3 --version
