@@ -4,7 +4,7 @@ source ./utils.sh
 
 # Function to install jq on Ubuntu
 install_jq_ubuntu() {
-  apt-get update
+#  apt-get update
   apt-get install -y jq
   apt-get install -y zlib1g-dev
   apt-get install -y build-essential libssl-dev libffi-dev libbz2-dev libreadline-dev libsqlite3-dev
