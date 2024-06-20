@@ -15,7 +15,7 @@ pipeline {
                     spec:
                       containers:
                       - name: test-container
-                        image: alpine:latest
+                        image: dtmintigrationtest/kubernets-jenkins-config:3.0.0
                         command:
                         - cat
                         tty: true
@@ -34,7 +34,7 @@ pipeline {
                     script {
                         echo "Starting Git operations"
                         // Install git if it's not already installed in the image
-                        sh 'apk update && apk add --no-cache make bash'
+                        sh 'apt-get update && apt-get install -y git make sudo'
 
                         // Clone all branches of the repository
                         checkout([
