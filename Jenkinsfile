@@ -5,7 +5,6 @@ pipeline {
             agent {
                 kubernetes {
                     label 'test-pod'
-                    defaultContainer 'jnlp'
                     yaml """
                     apiVersion: v1
                     kind: Pod
