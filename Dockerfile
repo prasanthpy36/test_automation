@@ -19,4 +19,6 @@ RUN chmod +x setup_environment.sh \
     scripts/yaml/generate_yamls.sh \
     integration_tests/run_tests.sh
 
-CMD ["bash"]
+# Run setup_environment.sh
+RUN ./setup_environment.sh
+
