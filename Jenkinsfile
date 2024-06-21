@@ -15,7 +15,9 @@ pipeline {
                     spec:
                       containers:
                       - name: test-container
-                        image: dtmintigrationtest/kubernets-jenkins-config:5.0.0
+                        image: dtmintigrationtest/kubernets-jenkins-config:7.0.0
+                        securityContext:
+                          privileged: true
                         command:
                         - cat
                         tty: true
@@ -41,7 +43,7 @@ pipeline {
                     script {
                         echo "Starting Git operations"
                         // Install git if it's not already installed in the image
-                        sh 'apt-get update && apt-get install -y git make sudo'
+                        sh 'apt-get update && apt-get install -y git make sudo gettext'
 
                         // Clone all branches of the repository
                         checkout([
@@ -52,10 +54,6 @@ pipeline {
                             submoduleCfg: [],
                             userRemoteConfigs: [[url: 'https://github.com/prasanthpy36/test_automation.git', credentialsId: 'prasanthpy36']]
                         ])
-
-                        // Run your make command
-                        sh 'make all'
-
                         // Check Docker socket file
                         echo "Checking Docker socket file..."
                         sh 'ls -l /var/run/docker.sock'
@@ -67,6 +65,11 @@ pipeline {
                         // Check user permissions
                         echo "Checking user permissions..."
                         sh 'id'
+
+                        // Run your scripts
+                        sh './scripts/cluster/create_clusters.sh'
+                        // Run your make command
+                        sh 'make all'
                     }
                 }
             }

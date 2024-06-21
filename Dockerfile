@@ -2,7 +2,10 @@ FROM ubuntu:20.04
 
 # Install dependencies
 RUN apt-get update && \
-    apt-get install -y curl jq git make
+    apt-get install -y curl jq git make sudo apt-utils
+
+# Install Docker
+RUN curl -fsSL https://get.docker.com -o get-docker.sh && sh get-docker.sh
 
 # Install k3d
 RUN curl -s https://raw.githubusercontent.com/rancher/k3d/main/install.sh | bash
@@ -21,4 +24,3 @@ RUN chmod +x setup_environment.sh \
 
 # Run setup_environment.sh
 RUN ./setup_environment.sh
-

@@ -2,40 +2,37 @@
 
 source ./utils.sh
 
+# Function to install jq on Ubuntu
+install_jq_ubuntu() {
+  sudo apt-get update
+  sudo apt-get install -y jq
+  sudo apt-get install -y zlib1g-dev
+  sudo apt-get install -y build-essential libssl-dev libffi-dev libbz2-dev libreadline-dev libsqlite3-dev
+}
+
+# Function to install jq on CentOS
+install_jq_centos() {
+  sudo yum update -y
+  sudo yum install -y jq
+  sudo yum install -y zlib-devel
+  sudo yum groupinstall -y "Development Tools"
+  sudo yum install -y openssl-devel bzip2-devel libffi-devel sqlite-devel
+}
+
+# Function to install jq on SLES
+install_jq_sles() {
+  sudo zypper refresh
+  sudo zypper install -y jq
+  sudo zypper install -y zlib-devel
+  sudo zypper install -y gcc libopenssl-devel libbz2-devel libffi-devel sqlite3-devel
+}
+
 # Function to install jq on Alpine
 install_jq_alpine() {
   sudo apk update
   sudo apk add jq
   sudo apk add zlib-dev
-  sudo apk add build-base openssl-dev libffi-dev bzip2-dev readline-dev sqlite-dev
-}
-
-# Function to install jq on Ubuntu
-install_jq_ubuntu() {
-  apt-get update
-  apt-get install -y jq
-  apt-get install -y zlib1g-dev
-  apt-get install -y build-essential libssl-dev libffi-dev libbz2-dev libreadline-dev libsqlite3-dev
-  apt-get install -y curl sudo
-}
-
-# Function to install jq on CentOS
-install_jq_centos() {
-  yum update -y
-  yum install -y jq
-  yum install -y zlib-devel
-  yum groupinstall -y "Development Tools"
-  yum install -y openssl-devel bzip2-devel libffi-devel sqlite-devel
-  yum install -y curl sudo
-}
-
-# Function to install jq on SLES
-install_jq_sles() {
-  zypper refresh
-  zypper install -y jq
-  zypper install -y zlib-devel
-  zypper install -y gcc libopenssl-devel libbz2-devel libffi-devel sqlite3-devel
-  zypper install -y curl sudo
+  sudo apk add build-base openssl-dev bzip2-dev libffi-dev sqlite-dev
 }
 
 # Detect the operating system
@@ -50,8 +47,10 @@ if [ "$OS" == "Linux" ]; then
     install_jq_centos
   elif [[ "$DISTRO" == *"SLES"* ]] || [[ "$DISTRO" == *"SUSE"* ]]; then
     install_jq_sles
+  elif [[ "$DISTRO" == *"Alpine"* ]]; then
+    install_jq_alpine
   else
-    echo "Unsupported Linux distribution. This script supports Ubuntu, CentOS, SLES, and SUSE."
+    echo "Unsupported Linux distribution. This script supports Ubuntu, CentOS, SLES, SUSE, and Alpine."
     exit 1
   fi
 else
@@ -59,79 +58,95 @@ else
   exit 1
 fi
 
-# Function to install a specific version of Python using pyenv
+
+# Function to install a specific version of Python
 install_python() {
   PYTHON_VERSION=$(jq -r '.pythonVersion' configuration/services.json)
   echo "Checking if Python $PYTHON_VERSION is installed..."
-  if command -v pyenv &> /dev/null; then
-    if pyenv versions | grep -q "$PYTHON_VERSION"; then
-      echo "Python $PYTHON_VERSION is already installed."
-    else
-      echo "Python $PYTHON_VERSION is not installed. Installing..."
-      curl https://pyenv.run | bash
-      export PATH="$HOME/.pyenv/bin:$PATH"
-      eval "$(pyenv init --path)"
-      eval "$(pyenv init -)"
-      eval "$(pyenv virtualenv-init -)"
-      pyenv install "$PYTHON_VERSION"
-      pyenv global "$PYTHON_VERSION"
-    fi
+  INSTALLED_PYTHON_VERSION=$(python3.12 -V 2>&1)
+  if [ "$INSTALLED_PYTHON_VERSION" == "Python $PYTHON_VERSION" ]; then
+    echo "Python $PYTHON_VERSION is already installed."
   else
-    echo "pyenv is not installed. Installing pyenv first..."
-    curl https://pyenv.run | bash
-    export PATH="$HOME/.pyenv/bin:$PATH"
-    eval "$(pyenv init --path)"
-    eval "$(pyenv init -)"
-    eval "$(pyenv virtualenv-init -)"
-    pyenv install "$PYTHON_VERSION"
-    pyenv global "$PYTHON_VERSION"
+    echo "Python $PYTHON_VERSION is not installed. Installing..."
+    curl -O https://www.python.org/ftp/python/"$PYTHON_VERSION"/Python-"$PYTHON_VERSION".tgz
+    tar -xzvf Python-"$PYTHON_VERSION".tgz
+    cd Python-"$PYTHON_VERSION" || exit
+    ./configure --enable-optimizations --with-ensurepip=install
+    make
+    sudo make altinstall
+    # Install pip for Python 3.12
+    sudo /usr/local/bin/python3.12 -m ensurepip --upgrade
+    cd .. || exit
+    rm -rf Python-"$PYTHON_VERSION"
+    rm Python-"$PYTHON_VERSION".tgz
+    # Set the default Python version to 3.12.3
+    sudo ln -sf /usr/local/bin/python3.12 /usr/bin/python
+    sudo ln -sf /usr/local/bin/pip3.12 /usr/bin/pip3
   fi
 }
 
-# Install Python packages locally
+# Install Python packages
 install_python_packages() {
   echo "Installing Python packages from requirements.txt..."
-  pip install --upgrade pip
-  pip install -r requirements.txt
+  python3.12 -m pip install --upgrade pip
+  python3.12 -m pip install -r requirements.txt
 }
 
+# Function to install Docker
 install_docker() {
   if command_exists docker; then
     echo "Docker is already installed."
+    return
+  fi
+
+  echo "Installing Docker..."
+  OS=$(uname -s)
+  if [ "$OS" == "Linux" ]; then
+    DISTRO=$(awk -F= '/^NAME/{print $2}' /etc/os-release)
+    if [[ "$DISTRO" == *"Ubuntu"* ]]; then
+      install_docker_ubuntu
+    elif [[ "$DISTRO" == *"CentOS"* ]]; then
+      install_docker_centos
+    elif [[ "$DISTRO" == *"SLES"* ]] || [[ "$DISTRO" == *"SUSE"* ]]; then
+      install_docker_sles
+    elif [[ "$DISTRO" == *"Alpine"* ]]; then
+      install_docker_alpine
+    else
+      echo "Unsupported Linux distribution. This script supports Ubuntu, CentOS, SLES, SUSE, and Alpine."
+      exit 1
+    fi
   else
-    echo "Installing Docker..."
-    export DEBIAN_FRONTEND=noninteractive
-    sudo ln -fs /usr/share/zoneinfo/Etc/UTC /etc/localtime
-    sudo apt-get update
-    sudo apt-get install -y tzdata
-    # Unset the environment variable for subsequent commands
-    unset DEBIAN_FRONTEND
-    sudo dpkg-reconfigure --frontend noninteractive tzdata
-    sudo apt-get install -y apt-transport-https ca-certificates curl software-properties-common
-    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
-    sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
-    sudo apt-get update
-    sudo apt-get install -y docker-ce
+    echo "Unsupported operating system. This script supports Linux."
+    exit 1
   fi
 }
 
-# Function to check if a command exists
-command_exists() {
-  command -v "$1" &> /dev/null
+install_docker_ubuntu() {
+  sudo apt-get update
+  sudo apt-get install -y apt-transport-https ca-certificates curl software-properties-common
+  curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+  sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+  sudo apt-get update
+  sudo apt-get install -y docker-ce
 }
 
-# Function to install Docker on Alpine
+install_docker_centos() {
+  sudo yum check-update
+  curl -fsSL https://get.docker.com/ | sh
+}
+
+install_docker_sles() {
+  sudo zypper refresh
+  sudo zypper install -y docker
+}
+
 install_docker_alpine() {
   sudo apk update
   sudo apk add docker
   sudo rc-update add docker boot
+  sudo service docker start
 }
-# Function to install Python on Alpine
-install_python_alpine() {
-  sudo apk update
-  # shellcheck disable=SC2317
-  sudo apk add python3 py3-pip
-}
+
 # Install kubectl
 install_kubectl() {
   if ! command_exists kubectl; then
@@ -141,7 +156,7 @@ install_kubectl() {
       exit 1
     fi
     chmod +x ./kubectl
-    mv ./kubectl /usr/local/bin/kubectl
+    sudo mv ./kubectl /usr/local/bin/kubectl
   else
     echo "kubectl is already installed."
   fi
@@ -161,7 +176,7 @@ install_k3d() {
 }
 
 # Call the installation functions
-install_docker
+#install_docker
 install_kubectl
 install_k3d
 install_python
@@ -174,7 +189,4 @@ kubectl version --client
 k3d version
 jq --version
 python3.12 --version
-pip --version
-
-# Exit the script
-exit 0
+pip3.12 --version
