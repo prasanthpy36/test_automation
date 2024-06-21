@@ -100,62 +100,18 @@ install_docker() {
     echo "Docker is already installed."
   else
     echo "Installing Docker..."
-    DISTRO=$(awk -F= '/^NAME/{print $2}' /etc/os-release)
-    if [[ "$DISTRO" == *"SLES"* ]] || [[ "$DISTRO" == *"SUSE"* ]]; then
-      DOCKER_VERSION=$(jq -r '.dockerVersion' configuration/services.json)
-      ARCH=$(uname -m)
-      sudo mkdir -p /usr/bin/docker
-      curl -L https://download.docker.com/linux/static/stable/"${ARCH}"/docker-"${DOCKER_VERSION}".tgz -o docker.tgz
-      sudo tar -xzf docker.tgz -C /usr/bin/docker --strip-components=1
-      rm docker.tgz
-      # Remove existing symbolic links
-      sudo rm -f /usr/bin/docker /usr/bin/dockerd /usr/bin/docker-init /usr/bin/docker-proxy /usr/bin/containerd /usr/bin/containerd-shim /usr/bin/runc
-      # Create new symbolic links
-      sudo ln -s /usr/bin/docker/docker /usr/bin/docker
-      sudo ln -s /usr/bin/docker/dockerd /usr/bin/dockerd
-      sudo ln -s /usr/bin/docker/docker-init /usr/bin/docker-init
-      sudo ln -s /usr/bin/docker/docker-proxy /usr/bin/docker-proxy
-      sudo ln -s /usr/bin/docker/containerd /usr/bin/containerd
-      sudo ln -s /usr/bin/docker/containerd-shim /usr/bin/containerd-shim
-      sudo ln -s /usr/bin/docker/runc /usr/bin/runc
-      # Create Docker service file
-      sudo tee /etc/systemd/system/docker.service > /dev/null <<EOF
-[Unit]
-Description=Docker Application Container Engine
-Documentation=https://docs.docker.com
-After=network-online.target firewalld.service
-Wants=network-online.target
-
-[Service]
-Type=notify
-ExecStart=/usr/bin/dockerd
-ExecReload=/bin/kill -s HUP \$MAINPID
-TimeoutSec=0
-RestartSec=2
-Restart=always
-
-[Install]
-WantedBy=multi-user.target
-EOF
-      sudo systemctl daemon-reload
-      sudo systemctl enable docker
-      sudo systemctl start docker
-    elif [[ "$DISTRO" == *"Ubuntu"* ]] || [[ "$DISTRO" == *"CentOS"* ]]; then
-      if ! curl -fsSL https://get.docker.com -o get-docker.sh; then
-        echo "Failed to download Docker installation script."
-        exit 1
-      fi
-      if ! sudo sh get-docker.sh; then
-        echo "Failed to install Docker."
-        exit 1
-      fi
-    else
-      echo "Unsupported Linux distribution. This script supports Ubuntu, CentOS, SLES, and SUSE."
-      exit 1
-    fi
-    sudo usermod -aG docker "$USER"
-    sudo systemctl enable docker
-    sudo systemctl start docker
+    export DEBIAN_FRONTEND=noninteractive
+    sudo ln -fs /usr/share/zoneinfo/Etc/UTC /etc/localtime
+    sudo apt-get update
+    sudo apt-get install -y tzdata
+    # Unset the environment variable for subsequent commands
+    unset DEBIAN_FRONTEND
+    sudo dpkg-reconfigure --frontend noninteractive tzdata
+    sudo apt-get install -y apt-transport-https ca-certificates curl software-properties-common
+    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+    sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+    sudo apt-get update
+    sudo apt-get install -y docker-ce
   fi
 }
 
