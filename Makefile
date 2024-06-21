@@ -7,13 +7,13 @@ setup: create-clusters generate-yamls deploy wait-for-pods
 all: setup test
 
 # Target to install tools
-#install-tools:
-#	@echo "Running setup_environment.sh script..."
-#	@chmod +x setup_environment.sh
-#	@./setup_environment.sh
+install-tools:
+	@echo "Running setup_environment.sh script..."
+	@chmod +x setup_environment.sh
+	@./setup_environment.sh
 
 # Target to create k3d clusters
-create-clusters:
+create-clusters: install-tools
 	@echo "Creating k3d clusters from configuration..."
 	@chmod +x scripts/cluster/create_clusters.sh
 	@scripts/cluster/create_clusters.sh $(CONFIG_FILE)
