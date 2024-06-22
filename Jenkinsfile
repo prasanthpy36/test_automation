@@ -54,20 +54,20 @@ pipeline {
                             submoduleCfg: [],
                             userRemoteConfigs: [[url: 'https://github.com/prasanthpy36/test_automation.git', credentialsId: 'prasanthpy36']]
                         ])
-                        // Check Docker socket file
-                        echo "Checking Docker socket file..."
-                        sh 'ls -l /var/run/docker.sock'
-
-                        // Check Docker version
-                        echo "Checking Docker version..."
-                        sh 'docker version'
-
-                        // Check user permissions
-                        echo "Checking user permissions..."
-                        sh 'id'
-
-                        // Run your scripts
-                        sh './scripts/cluster/create_clusters.sh'
+//                         // Check Docker socket file
+//                         echo "Checking Docker socket file..."
+//                         sh 'ls -l /var/run/docker.sock'
+//
+//                         // Check Docker version
+//                         echo "Checking Docker version..."
+//                         sh 'docker version'
+//
+//                         // Check user permissions
+//                         echo "Checking user permissions..."
+//                         sh 'id'
+//
+//                         // Run your scripts
+//                         sh './scripts/cluster/create_clusters.sh'
                         // Run your make command
                         sh 'make all'
                     }
