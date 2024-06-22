@@ -43,7 +43,7 @@ pipeline {
                     script {
                         echo "Starting Git operations"
                         // Install git if it's not already installed in the image
-                        sh 'apt-get update && apt-get install -y git make sudo'
+                        sh 'apt-get update && apt-get install -y git make sudo docker.io'
 
                         // Clone all branches of the repository
                         checkout([
