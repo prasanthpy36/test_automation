@@ -14,8 +14,18 @@ pipeline {
                         jenkins/label: test-pod
                     spec:
                       containers:
+                      - name: dind-container
+                        image: docker:20.10.24-dind
+                        securityContext:
+                          privileged: true
+                        env:
+                        - name: DOCKER_TLS_CERTDIR
+                          value: ""
+                        volumeMounts:
+                        - mountPath: /var/lib/docker
+                          name: docker-lib
                       - name: test-container
-                        image: dtmintigrationtest/kubernets-jenkins-config:ubuntu
+                        image: dtmintigrationtest/kubernets-jenkins-config:ubuntu1
                         securityContext:
                           privileged: true
                         volumeMounts:
@@ -23,12 +33,12 @@ pipeline {
                           name: docker-sock
                           readOnly: false
                         command: ["/bin/sh", "-c"]
-                        args: ["dockerd-entrypoint.sh & while sleep 1000; do :; done"]
+                        args: ["while sleep 1000; do :; done"]
                       volumes:
                       - name: docker-sock
-                        hostPath:
-                          path: /var/run/docker.sock
-                          type: Socket
+                        emptyDir: {}
+                      - name: docker-lib
+                        emptyDir: {}
                     """
                 }
             }
