@@ -3,7 +3,7 @@ pipeline {
     stages {
         stage('Create Pod and Clone Repo') {
             agent {
-               kubernetes {
+                kubernetes {
                     label 'test-pod'
                     defaultContainer 'test-container'
                     yaml """
@@ -14,27 +14,17 @@ pipeline {
                         jenkins/label: test-pod
                     spec:
                       containers:
-                      - name: dind
-                        image: docker:20.10.24-dind
-                        securityContext:
-                          privileged: true
-                        volumeMounts:
-                        - mountPath: /var/lib/docker
-                          name: docker-storage
                       - name: test-container
-                        image: dtmintigrationtest/kubernets-jenkins-config:ubuntu1
+                        image: dtmintigrationtest/kubernets-jenkins-config:ubuntu
                         securityContext:
                           privileged: true
-                        env:
-                        - name: DOCKER_HOST
-                          value: "tcp://localhost:2375"
                         volumeMounts:
                         - mountPath: /var/run/docker.sock
                           name: docker-sock
                           readOnly: false
+                        command: ["/bin/sh", "-c"]
+                        args: ["dockerd-entrypoint.sh & while sleep 1000; do :; done"]
                       volumes:
-                      - name: docker-storage
-                        emptyDir: {}
                       - name: docker-sock
                         hostPath:
                           path: /var/run/docker.sock
@@ -58,16 +48,12 @@ pipeline {
                         ])
 
                         // Check Docker socket file
-//                         echo "Checking Docker socket file..."
-//                         sh 'ls -l /var/run/docker.sock'
+                        echo "Checking Docker socket file..."
+                        sh 'ls -l /var/run/docker.sock'
 
                         // Check Docker version
                         echo "Checking Docker version..."
                         sh 'docker version'
-
-                        // Check Docker service status
-                        echo "Checking Docker service status..."
-                        sh 'service docker status'
 
                         // Run your scripts
                         echo "Running setup_environment.sh script"
