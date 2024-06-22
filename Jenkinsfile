@@ -3,7 +3,7 @@ pipeline {
     stages {
         stage('Create Pod and Clone Repo') {
             agent {
-                kubernetes {
+               kubernetes {
                     label 'test-pod'
                     defaultContainer 'test-container'
                     yaml """
@@ -14,25 +14,27 @@ pipeline {
                         jenkins/label: test-pod
                     spec:
                       containers:
+                      - name: dind
+                        image: docker:20.10.24-dind
+                        securityContext:
+                          privileged: true
+                        volumeMounts:
+                        - mountPath: /var/lib/docker
+                          name: docker-storage
                       - name: test-container
                         image: dtmintigrationtest/kubernets-jenkins-config:dind
                         securityContext:
                           privileged: true
-                        command:
-                        - cat
-                        tty: true
-                        resources:
-                          requests:
-                            memory: "8Gi"
-                            cpu: "4"
-                          limits:
-                            memory: "12Gi"
-                            cpu: "4"
+                        env:
+                        - name: DOCKER_HOST
+                          value: "tcp://localhost:2375"
                         volumeMounts:
                         - mountPath: /var/run/docker.sock
                           name: docker-sock
                           readOnly: false
                       volumes:
+                      - name: docker-storage
+                        emptyDir: {}
                       - name: docker-sock
                         hostPath:
                           path: /var/run/docker.sock
@@ -56,8 +58,8 @@ pipeline {
                         ])
 
                         // Check Docker socket file
-//                         echo "Checking Docker socket file..."
-//                         sh 'ls -l /var/run/docker.sock'
+                        echo "Checking Docker socket file..."
+                        sh 'ls -l /var/run/docker.sock'
 
                         // Check Docker version
                         echo "Checking Docker version..."
