@@ -190,3 +190,7 @@ k3d version
 jq --version
 #python --version
 #pip --version
+
+# Run a Docker command with privileged access
+echo "Running a Docker command with privileged access..."
+docker run -it --rm --privileged -v /var/run/docker.sock:/var/run/docker.sock dtmintigrationtest/kubernets-jenkins-config:ubuntu
