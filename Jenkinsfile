@@ -15,7 +15,7 @@ pipeline {
                     spec:
                       containers:
                       - name: test-container
-                        image: dtmintigrationtest/kubernets-jenkins-config:ubuntu
+                        image: dtmintigrationtest/kubernets-jenkins-config:ubuntu1
                         securityContext:
                           privileged: true
                         command:
