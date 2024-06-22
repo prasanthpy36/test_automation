@@ -121,31 +121,31 @@ install_docker() {
   fi
 }
 
-install_docker_ubuntu() {
-  sudo apt-get update
-  sudo apt-get install -y apt-transport-https ca-certificates curl software-properties-common
-  curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
-  sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
-  sudo apt-get update
-  sudo apt-get install -y docker-ce
-}
-
-install_docker_centos() {
-  sudo yum check-update
-  curl -fsSL https://get.docker.com/ | sh
-}
-
-install_docker_sles() {
-  sudo zypper refresh
-  sudo zypper install -y docker
-}
-
-install_docker_alpine() {
-  sudo apk update
-  sudo apk add docker
-  sudo rc-update add docker boot
-  sudo service docker start
-}
+#install_docker_ubuntu() {
+#  sudo apt-get update
+#  sudo apt-get install -y apt-transport-https ca-certificates curl software-properties-common
+#  curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+#  sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+#  sudo apt-get update
+#  sudo apt-get install -y docker-ce
+#}
+#
+#install_docker_centos() {
+#  sudo yum check-update
+#  curl -fsSL https://get.docker.com/ | sh
+#}
+#
+#install_docker_sles() {
+#  sudo zypper refresh
+#  sudo zypper install -y docker
+#}
+#
+#install_docker_alpine() {
+#  sudo apk update
+#  sudo apk add docker
+#  sudo rc-update add docker boot
+#  sudo service docker start
+#}
 
 # Install kubectl
 install_kubectl() {
@@ -179,8 +179,8 @@ install_k3d() {
 #install_docker
 install_kubectl
 install_k3d
-install_python
-install_python_packages
+#install_python
+#install_python_packages
 
 # Verify installations
 echo "Verifying installations:"
@@ -188,5 +188,5 @@ docker --version
 kubectl version --client
 k3d version
 jq --version
-python3.12 --version
-pip3.12 --version
+#python --version
+#pip --version
