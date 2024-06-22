@@ -22,7 +22,7 @@ pipeline {
                         - mountPath: /var/lib/docker
                           name: docker-storage
                       - name: test-container
-                        image: dtmintigrationtest/kubernets-jenkins-config:dind
+                        image: dtmintigrationtest/kubernets-jenkins-config:ubuntu1
                         securityContext:
                           privileged: true
                         env:
@@ -58,8 +58,8 @@ pipeline {
                         ])
 
                         // Check Docker socket file
-                        echo "Checking Docker socket file..."
-                        sh 'ls -l /var/run/docker.sock'
+//                         echo "Checking Docker socket file..."
+//                         sh 'ls -l /var/run/docker.sock'
 
                         // Check Docker version
                         echo "Checking Docker version..."
