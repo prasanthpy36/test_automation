@@ -15,7 +15,7 @@ pipeline {
                     spec:
                       containers:
                       - name: test-container
-                        image: dtmintigrationtest/kubernets-jenkins-config:7.0.0
+                        image: dtmintigrationtest/kubernets-jenkins-config:dind
                         securityContext:
                           privileged: true
                         command:
@@ -42,8 +42,9 @@ pipeline {
                 container('test-container') {
                     script {
                         echo "Starting Git operations"
-                        // Install git if it's not already installed in the image
-                        sh 'apt-get update && apt-get install -y git make sudo gettext'
+
+                        // Install git and other dependencies if they are not already installed
+                        sh 'apk add --no-cache git make sudo gettext'
 
                         // Clone all branches of the repository
                         checkout([
@@ -66,6 +67,12 @@ pipeline {
                         echo "Checking user permissions..."
                         sh 'id'
 
+                        // Start Docker daemon in the background
+                        sh 'dockerd-entrypoint.sh &'
+
+                        // Wait for Docker daemon to start
+                        sleep 10
+
                         // Run your scripts
                         sh './scripts/cluster/create_clusters.sh'
                         // Run your make command
@@ -77,9 +84,7 @@ pipeline {
     }
     post {
         always {
-            node('test-pod') {
-                cleanWs()
-            }
+            cleanWs()
         }
     }
 }

@@ -2,6 +2,18 @@
 
 source ./utils.sh
 
+
+#!/bin/bash
+
+# Check if Minikube is running
+if minikube status &> /dev/null
+then
+  echo "Minikube is running"
+else
+  echo "Minikube is not running, starting it now..."
+  minikube start --vm-driver=none
+fi
+
 # Function to install jq on Ubuntu
 install_jq_ubuntu() {
   sudo apt-get update
