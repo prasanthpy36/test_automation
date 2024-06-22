@@ -2,10 +2,24 @@ FROM docker:20.10-dind
 
 # Install dependencies
 RUN apk update && \
-    apk add curl jq git make gettext sudo bash libc6-compat
+    apk add curl \
+    jq \
+    git \
+    make \
+    sudo \
+    apt-utils \
+    apt-transport-https \
+    ca-certificates \
+    zlib1g-dev \
+    build-essential \
+    libssl-dev \
+    libffi-dev \
+    libbz2-dev \
+    libreadline-dev \
+    libsqlite3-dev
 
-# Create symbolic link for libresolv.so.2
-RUN ln -sf /lib/libc.musl-x86_64.so.1 /lib64/ld-linux-x86-64.so.2
+# Install k3d
+RUN curl -s https://raw.githubusercontent.com/rancher/k3d/main/install.sh | bash
 
 # Install kubectl
 RUN curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl" && \

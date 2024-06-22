@@ -15,7 +15,7 @@ pipeline {
                     spec:
                       containers:
                       - name: test-container
-                        image: dtmintigrationtest/kubernets-jenkins-config:dind
+                        image: docker:20.10-dind
                         securityContext:
                           privileged: true
                         command:
@@ -31,10 +31,12 @@ pipeline {
                         volumeMounts:
                         - mountPath: /var/run/docker.sock
                           name: docker-sock
+                          readOnly: false
                       volumes:
                       - name: docker-sock
                         hostPath:
                           path: /var/run/docker.sock
+                          type: Socket
                     """
                 }
             }
@@ -42,9 +44,6 @@ pipeline {
                 container('test-container') {
                     script {
                         echo "Starting Git operations"
-
-                        // Install git and other dependencies if they are not already installed
-                        sh 'apk add --no-cache git make sudo gettext'
 
                         // Clone all branches of the repository
                         checkout([
@@ -55,6 +54,7 @@ pipeline {
                             submoduleCfg: [],
                             userRemoteConfigs: [[url: 'https://github.com/prasanthpy36/test_automation.git', credentialsId: 'prasanthpy36']]
                         ])
+
                         // Check Docker socket file
                         echo "Checking Docker socket file..."
                         sh 'ls -l /var/run/docker.sock'
@@ -63,19 +63,16 @@ pipeline {
                         echo "Checking Docker version..."
                         sh 'docker version'
 
-                        // Check user permissions
-                        echo "Checking user permissions..."
-                        sh 'id'
-
-                        // Start Docker daemon in the background
-                        sh 'dockerd-entrypoint.sh &'
-
-                        // Wait for Docker daemon to start
-                        sleep 10
+                        // Check Docker service status
+                        echo "Checking Docker service status..."
+                        sh 'service docker status'
 
                         // Run your scripts
-                        sh './scripts/cluster/create_clusters.sh'
-                        // Run your make command
+                        echo "Running setup_environment.sh script"
+                        sh './setup_environment.sh'
+
+                        // Ensure privileged access and then run the make all command
+                        echo "Running make all command with privileged access..."
                         sh 'make all'
                     }
                 }
@@ -84,7 +81,9 @@ pipeline {
     }
     post {
         always {
-            cleanWs()
+            node('test-pod') {
+                cleanWs()
+            }
         }
     }
 }
