@@ -1,16 +1,6 @@
 pipeline {
     agent none
     stages {
-        stage('Check Docker socket on host') {
-            agent any
-            steps {
-                script {
-                    // Check Docker socket file on host
-                    echo "Checking Docker socket file on host..."
-                    sh 'ls -l /var/run/docker.sock'
-                }
-            }
-        }
         stage('Create Pod and Clone Repo') {
             agent {
                 kubernetes {
@@ -25,7 +15,7 @@ pipeline {
                     spec:
                       containers:
                       - name: test-container
-                        image: dtmintigrationtest/kubernets-jenkins-config:ubuntu
+                        image: ubuntu:20.04
                         securityContext:
                           privileged: true
                         command:
