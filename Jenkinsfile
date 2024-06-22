@@ -15,26 +15,21 @@ pipeline {
                     spec:
                       containers:
                       - name: test-container
-                        image: ubuntu:20.04
+                        image: dtmintigrationtest/kubernets-jenkins-config:ubuntu
                         securityContext:
                           privileged: true
                         command:
                         - cat
                         tty: true
-                        resources:
-                          requests:
-                            memory: "8Gi"
-                            cpu: "4"
-                          limits:
-                            memory: "12Gi"
-                            cpu: "4"
                         volumeMounts:
                         - mountPath: /var/run/docker.sock
                           name: docker-sock
+                          readOnly: false
                       volumes:
                       - name: docker-sock
                         hostPath:
                           path: /var/run/docker.sock
+                          type: Socket
                     """
                 }
             }
@@ -42,8 +37,6 @@ pipeline {
                 container('test-container') {
                     script {
                         echo "Starting Git operations"
-                        // Install git if it's not already installed in the image
-                        sh 'apt-get update && apt-get install -y git make sudo docker.io'
 
                         // Clone all branches of the repository
                         checkout([
@@ -68,6 +61,11 @@ pipeline {
                         sh 'service docker status'
 
                         // Run your scripts
+                        echo "Running setup_environment.sh script"
+                        sh './setup_environment.sh'
+
+                        // Ensure privileged access and then run the make all command
+                        echo "Running make all command with privileged access..."
                         sh 'make all'
                     }
                 }
