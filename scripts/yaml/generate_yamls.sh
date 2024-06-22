@@ -45,7 +45,7 @@ for cluster in $CLUSTERS; do
     envsubst < "$SERVICE_TEMPLATE" > "$SERVICE_OUTPUT"
 
     # Apply the generated YAML files
-    kubectl apply -f "$DEPLOYMENT_OUTPUT"
-    kubectl apply -f "$SERVICE_OUTPUT"
+    kubectl apply -f "$DEPLOYMENT_OUTPUT" --validate=false
+    kubectl apply -f "$SERVICE_OUTPUT" --validate=false
   done
 done

@@ -13,7 +13,7 @@ install-tools:
 	@./setup_environment.sh
 
 # Target to create k3d clusters
-create-clusters: install-tools
+create-clusters:
 	@echo "Creating k3d clusters from configuration..."
 	@chmod +x scripts/cluster/create_clusters.sh
 	@scripts/cluster/create_clusters.sh $(CONFIG_FILE)

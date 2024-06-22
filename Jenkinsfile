@@ -15,28 +15,21 @@ pipeline {
                     spec:
                       containers:
                       - name: test-container
-                        image: alpine:latest
+                        image: dtmintigrationtest/kubernets-jenkins-config:ubuntu1
+                        securityContext:
+                          privileged: true
                         command:
                         - cat
                         tty: true
-                        resources:
-                          requests:
-                            memory: "8Gi"
-                            cpu: "4"
-                          limits:
-                            memory: "12Gi"
-                            cpu: "6"
-                      - name: jnlp
-                        image: jenkins/inbound-agent:latest
-                        args:
-                        - \${computer.jnlpmac}
-                        - \${computer.name}
                         volumeMounts:
-                        - mountPath: /home/jenkins/agent
-                          name: workspace-volume
-                    volumes:
-                      - name: workspace-volume
-                        emptyDir: {}
+                        - mountPath: /var/run/docker.sock
+                          name: docker-sock
+                          readOnly: false
+                      volumes:
+                      - name: docker-sock
+                        hostPath:
+                          path: /var/run/docker.sock
+                          type: Socket
                     """
                 }
             }
@@ -44,28 +37,35 @@ pipeline {
                 container('test-container') {
                     script {
                         echo "Starting Git operations"
-                        // Install git if it's not already installed in the image
-                        sh 'apt-get update && apt-get install -y git make sudo'
 
-                        // Clone the repository
-                        git url: 'https://github.com/prasanthpy36/test_automation.git', branch: 'main', credentialsId: 'prasanthpy36'
-                    }
-                }
-            }
-        }
-        stage('Setup and Test') {
-            agent {
-                kubernetes {
-                    label 'test-pod'
-                    defaultContainer 'jnlp'
-                }
-            }
-            steps {
-                container('test-container') {
-                    script {
-                        echo "Running setup and tests"
-                        sh 'apt-get update && apt-get install -y git make sudo'
-                        // Run your make command or other setup/test commands
+                        // Clone all branches of the repository
+                        checkout([
+                            $class: 'GitSCM',
+                            branches: [[name: '**']],
+                            doGenerateSubmoduleConfigurations: false,
+                            extensions: [],
+                            submoduleCfg: [],
+                            userRemoteConfigs: [[url: 'https://github.com/prasanthpy36/test_automation.git', credentialsId: 'prasanthpy36']]
+                        ])
+
+                        // Check Docker socket file
+                        echo "Checking Docker socket file..."
+                        sh 'ls -l /var/run/docker.sock'
+
+                        // Check Docker version
+                        echo "Checking Docker version..."
+                        sh 'docker version'
+
+                        // Check Docker service status
+                        echo "Checking Docker service status..."
+                        sh 'service docker status'
+
+                        // Run your scripts
+                        echo "Running setup_environment.sh script"
+                        sh './setup_environment.sh'
+
+                        // Ensure privileged access and then run the make all command
+                        echo "Running make all command with privileged access..."
                         sh 'make all'
                     }
                 }
