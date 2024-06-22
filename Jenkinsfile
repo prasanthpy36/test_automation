@@ -15,7 +15,7 @@ pipeline {
                     spec:
                       containers:
                       - name: test-container
-                        image: docker:20.10-dind
+                        image: dtmintigrationtest/kubernets-jenkins-config:dind
                         securityContext:
                           privileged: true
                         command:
@@ -56,8 +56,8 @@ pipeline {
                         ])
 
                         // Check Docker socket file
-                        echo "Checking Docker socket file..."
-                        sh 'ls -l /var/run/docker.sock'
+//                         echo "Checking Docker socket file..."
+//                         sh 'ls -l /var/run/docker.sock'
 
                         // Check Docker version
                         echo "Checking Docker version..."

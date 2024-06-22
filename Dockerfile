@@ -7,16 +7,15 @@ RUN apk update && \
     git \
     make \
     sudo \
-    apt-utils \
-    apt-transport-https \
+    bash \
     ca-certificates \
-    zlib1g-dev \
-    build-essential \
-    libssl-dev \
+    zlib-dev \
+    build-base \
+    openssl-dev \
     libffi-dev \
-    libbz2-dev \
-    libreadline-dev \
-    libsqlite3-dev
+    bzip2-dev \
+    readline-dev \
+    sqlite-dev
 
 # Install k3d
 RUN curl -s https://raw.githubusercontent.com/rancher/k3d/main/install.sh | bash
