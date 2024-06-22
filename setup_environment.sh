@@ -7,7 +7,7 @@ install_jq_ubuntu() {
   sudo apt-get update
   sudo apt-get install -y jq
   sudo apt-get install -y zlib1g-dev
-  sudo apt-get install -y build-essential libssl-dev libffi-dev libbz2-dev libreadline-dev libsqlite3-dev curl
+  sudo apt-get install -y build-essential libssl-dev libffi-dev libbz2-dev libreadline-dev libsqlite3-dev curl docker.io
 }
 
 # Function to install jq on CentOS
