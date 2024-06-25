@@ -56,6 +56,9 @@ pipeline {
                             submoduleCfg: [],
                             userRemoteConfigs: [[url: 'https://github.com/prasanthpy36/test_automation.git', credentialsId: 'prasanthpy36']]
                         ])
+                         // Check Docker socket file
+                         echo "Checking Docker socket file..."
+                         sh 'ls -l /var/run/docker.sock'
 
                         // Check Docker version
                         echo "Checking Docker version..."
