@@ -3,7 +3,7 @@ import requests
 
 def test_product_service():
     # Make an HTTP request to the product service
-    response = requests.get("http://localhost:30081/products/1")
+    response = requests.get("http://localhost:8081/products/1")
 
     # Check the status code
     assert response.status_code == 200

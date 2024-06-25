@@ -5,7 +5,7 @@ pipeline {
             agent {
                 kubernetes {
                     label 'test-pod'
-                    defaultContainer 'test-container'
+                    defaultContainer 'dind-container'
                     yaml """
                     apiVersion: v1
                     kind: Pod
@@ -43,7 +43,7 @@ pipeline {
                 }
             }
             steps {
-                container('test-container') {
+                container('dind-container') {
                     script {
                         echo "Starting Git operations"
 
