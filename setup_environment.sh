@@ -2,18 +2,6 @@
 
 source ./utils.sh
 
-
-#!/bin/bash
-
-# Check if Minikube is running
-if minikube status &> /dev/null
-then
-  echo "Minikube is running"
-else
-  echo "Minikube is not running, starting it now..."
-  minikube start --vm-driver=none
-fi
-
 # Function to install jq on Ubuntu
 install_jq_ubuntu() {
   sudo apt-get update
@@ -104,61 +92,6 @@ install_python_packages() {
   python3.12 -m pip install -r requirements.txt
 }
 
-# Function to install Docker
-install_docker() {
-  if command_exists docker; then
-    echo "Docker is already installed."
-    return
-  fi
-
-  echo "Installing Docker..."
-  OS=$(uname -s)
-  if [ "$OS" == "Linux" ]; then
-    DISTRO=$(awk -F= '/^NAME/{print $2}' /etc/os-release)
-    if [[ "$DISTRO" == *"Ubuntu"* ]]; then
-      install_docker_ubuntu
-    elif [[ "$DISTRO" == *"CentOS"* ]]; then
-      install_docker_centos
-    elif [[ "$DISTRO" == *"SLES"* ]] || [[ "$DISTRO" == *"SUSE"* ]]; then
-      install_docker_sles
-    elif [[ "$DISTRO" == *"Alpine"* ]]; then
-      install_docker_alpine
-    else
-      echo "Unsupported Linux distribution. This script supports Ubuntu, CentOS, SLES, SUSE, and Alpine."
-      exit 1
-    fi
-  else
-    echo "Unsupported operating system. This script supports Linux."
-    exit 1
-  fi
-}
-
-#install_docker_ubuntu() {
-#  sudo apt-get update
-#  sudo apt-get install -y apt-transport-https ca-certificates curl software-properties-common
-#  curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
-#  sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
-#  sudo apt-get update
-#  sudo apt-get install -y docker-ce
-#}
-#
-#install_docker_centos() {
-#  sudo yum check-update
-#  curl -fsSL https://get.docker.com/ | sh
-#}
-#
-#install_docker_sles() {
-#  sudo zypper refresh
-#  sudo zypper install -y docker
-#}
-#
-#install_docker_alpine() {
-#  sudo apk update
-#  sudo apk add docker
-#  sudo rc-update add docker boot
-#  sudo service docker start
-#}
-
 # Install kubectl
 install_kubectl() {
   if ! command_exists kubectl; then
@@ -191,8 +124,8 @@ install_k3d() {
 #install_docker
 install_kubectl
 install_k3d
-#install_python
-#install_python_packages
+install_python
+install_python_packages
 
 # Verify installations
 echo "Verifying installations:"
@@ -200,6 +133,6 @@ docker --version
 kubectl version --client
 k3d version
 jq --version
-#python --version
-#pip --version
+python --version
+pip --version
 

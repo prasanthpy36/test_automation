@@ -15,6 +15,7 @@ RUN apk update && \
     libffi-dev \
     bzip2-dev \
     readline-dev \
+    gettext-base \
     sqlite-dev
 
 # Install k3d
