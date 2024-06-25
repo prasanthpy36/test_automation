@@ -1,0 +1,14 @@
+{
+  "user_service": {
+    "name": "user_service",
+    "image": "dtmintigrationtest/user-service",
+    "port": "8080",
+    "version": "1.0.0"
+  },
+  "product_service": {
+    "name": "product_service",
+    "image": "dtmintigrationtest/product-service",
+    "port": "8081",
+    "version": "1.0.0"
+  }
+}
