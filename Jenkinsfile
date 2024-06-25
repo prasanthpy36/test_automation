@@ -58,16 +58,16 @@ pipeline {
                         ])
 
                         // Check Docker socket file
-                        echo "Checking Docker socket file..."
-                        sh 'ls -l /var/run/docker.sock'
+//                         echo "Checking Docker socket file..."
+//                         sh 'ls -l /var/run/docker.sock'
 
                         // Check Docker version
                         echo "Checking Docker version..."
                         sh 'docker version'
 
                         // Run your scripts
-                        echo "Running setup_environment.sh script"
-                        sh './setup_environment.sh'
+//                         echo "Running setup_environment.sh script"
+//                         sh './setup_environment.sh'
 
                         // Ensure privileged access and then run the make all command
                         echo "Running make all command with privileged access..."
