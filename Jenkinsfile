@@ -14,7 +14,7 @@ pipeline {
             steps {
                  echo "Starting Git operations"
                  // Clone all branches of the repository
-                 git url: 'https://github.com/prasanthpy36/test_automation.git', credentialsId: 'prasanthpy36', branch: '**'
+//                  git url: 'https://github.com/prasanthpy36/test_automation.git', credentialsId: 'prasanthpy36', branch: '**'
                  sh 'make setup'
             }
         }
