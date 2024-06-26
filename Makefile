@@ -16,9 +16,7 @@ install-tools:
 create-docker-containers:
 	@echo "Creating Docker containers from configuration..."
 	@chmod +x setup_docker_services.sh
-	newgrp docker <<EONG
 	./setup_docker_services.sh
-	EONG
 
 # Target to create k3d clusters
 #create-clusters:
