@@ -181,6 +181,23 @@ EONG
     fi
 }
 
+install_docker_debain() {
+  if ! curl -fsSL https://get.docker.com -o get-docker.sh; then
+      echo "Failed to download Docker installation script."
+      exit 1
+  fi
+  if ! sudo sh get-docker.sh; then
+      echo "Failed to install Docker."
+      exit 1
+  fi
+  sudo usermod -aG docker "$USER"
+  newgrp docker <<EONG
+  sudo systemctl enable docker
+  sudo systemctl start docker
+EONG
+}
+
+
 # Install k3d
 install_k3d() {
   if ! command_exists k3d; then
@@ -196,6 +213,7 @@ install_k3d() {
 
 # Call the installation functions
 install_docker
+install_docker_debain
 install_kubectl
 install_k3d
 install_python
@@ -210,3 +228,6 @@ jq --version
 python --version
 pip3 --version
 
+
+}
+}
