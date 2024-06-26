@@ -58,17 +58,19 @@ test:
 	  @chmod +x integration_tests/run_tests.sh
 	  @./integration_tests/run_tests.sh $(TEST_REPORT)
 # Clean up generated files
-#clean:
-#	@echo "Deleting k3d clusters..."
-#	@CLUSTERS=$(shell jq -r '.clusters[].name' $(CONFIG_FILE)); \
-#	for cluster in $$CLUSTERS; do \
-#		if k3d cluster list | grep -q $$cluster; then \
-#			echo "Deleting k3d cluster $$cluster..."; \
-#			k3d cluster delete $$cluster; \
-#		fi; \
-#	done
-#	@echo "Removing generated files..."
-#	@rm -f $(GENERATED_DIR)/*.yaml
+clean:
+	@echo "Deleting Docker containers and images..."
+	@CONTAINERS=$(shell jq -r '.[].name' $(CONFIG_FILE)); \
+	for container in $$CONTAINERS; do \
+		if docker ps -a -q -f name=$$container; then \
+			echo "Deleting Docker container $$container..."; \
+			docker rm -f $$container; \
+		fi; \
+		if docker images -q $$container; then \
+			echo "Deleting Docker image $$container..."; \
+			docker rmi $$container; \
+		fi; \
+	done
 
 # Phony targets
 .PHONY: all install-tools create-docker-containers test

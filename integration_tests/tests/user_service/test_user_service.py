@@ -3,7 +3,7 @@ import requests
 
 def test_user_service():
     # Make an HTTP request to the user service
-    response = requests.get("http://localhost:8080/users/1")
+    response = requests.get("http://user_service:8080/users/1")
 
     # Check the status code
     assert response.status_code == 200
