@@ -19,6 +19,18 @@ do
     SERVICE_PORT=$(jq -r '.'$service'.port' $CONFIG_FILE)
     SERVICE_VERSION=$(jq -r '.'$service'.version' $CONFIG_FILE)
 
+    # Check if a Docker container with the same name already exists
+    if [ "$(docker ps -a -q -f name=$SERVICE_NAME)" ]; then
+        # Remove the existing Docker container
+        docker rm -f $SERVICE_NAME
+    fi
+
+    # Check if a Docker image with the same name already exists
+    if [ "$(docker images -q $SERVICE_IMAGE:$SERVICE_VERSION)" ]; then
+        # Remove the existing Docker image
+        docker rmi $SERVICE_IMAGE:$SERVICE_VERSION
+    fi
+
     # Pull the specific version of the Docker image from DockerHub
     docker pull $SERVICE_IMAGE:$SERVICE_VERSION || true
 
