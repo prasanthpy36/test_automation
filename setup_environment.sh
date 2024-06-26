@@ -46,24 +46,24 @@ install_jq_alpine() {
 OS=$(uname -s)
 
 # Install jq based on the operating system
-#if [ "$OS" == "Linux" ]; then
-#  DISTRO=$(awk -F= '/^NAME/{print $2}' /etc/os-release)
-#  if [[ "$DISTRO" == *"Ubuntu"* ]] || [[ "$DISTRO" == *"Debian"* ]]; then
-#    install_jq_debian_based
-#  elif [[ "$DISTRO" == *"CentOS"* ]]; then
-#    install_jq_centos
-#  elif [[ "$DISTRO" == *"SLES"* ]] || [[ "$DISTRO" == *"SUSE"* ]]; then
-#    install_jq_sles
-#  elif [[ "$DISTRO" == *"Alpine"* ]]; then
-#    install_jq_alpine
-#  else
-#    echo "Unsupported Linux distribution. This script supports Ubuntu, CentOS, SLES, SUSE, and Alpine."
-#    exit 1
-#  fi
-#else
-#  echo "Unsupported operating system. This script supports Linux."
-#  exit 1
-#fi
+if [ "$OS" == "Linux" ]; then
+  DISTRO=$(awk -F= '/^NAME/{print $2}' /etc/os-release)
+  if [[ "$DISTRO" == *"Ubuntu"* ]] || [[ "$DISTRO" == *"Debian"* ]]; then
+    install_jq_debian_based
+  elif [[ "$DISTRO" == *"CentOS"* ]]; then
+    install_jq_centos
+  elif [[ "$DISTRO" == *"SLES"* ]] || [[ "$DISTRO" == *"SUSE"* ]]; then
+    install_jq_sles
+  elif [[ "$DISTRO" == *"Alpine"* ]]; then
+    install_jq_alpine
+  else
+    echo "Unsupported Linux distribution. This script supports Ubuntu, CentOS, SLES, SUSE, and Alpine."
+    exit 1
+  fi
+else
+  echo "Unsupported operating system. This script supports Linux."
+  exit 1
+fi
 
 
 # Function to install a specific version of Python
@@ -113,32 +113,33 @@ install_kubectl() {
     echo "kubectl is already installed."
   fi
 }
+
 # Function to install Docker
 install_docker() {
-  if command_exists docker; then
-    echo "Docker is already installed."
-  else
-    echo "Installing Docker..."
-    DISTRO=$(awk -F= '/^NAME/{print $2}' /etc/os-release)
-    if [[ "$DISTRO" == *"SLES"* ]] || [[ "$DISTRO" == *"SUSE"* ]]; then
-      DOCKER_VERSION=$(jq -r '.dockerVersion' configuration/services.json)
-      ARCH=$(uname -m)
-      sudo mkdir -p /usr/bin/docker
-      curl -L https://download.docker.com/linux/static/stable/"${ARCH}"/docker-"${DOCKER_VERSION}".tgz -o docker.tgz
-      sudo tar -xzf docker.tgz -C /usr/bin/docker --strip-components=1
-      rm docker.tgz
-      # Remove existing symbolic links
-      sudo rm -f /usr/bin/docker /usr/bin/dockerd /usr/bin/docker-init /usr/bin/docker-proxy /usr/bin/containerd /usr/bin/containerd-shim /usr/bin/runc
-      # Create new symbolic links
-      sudo ln -s /usr/bin/docker/docker /usr/bin/docker
-      sudo ln -s /usr/bin/docker/dockerd /usr/bin/dockerd
-      sudo ln -s /usr/bin/docker/docker-init /usr/bin/docker-init
-      sudo ln -s /usr/bin/docker/docker-proxy /usr/bin/docker-proxy
-      sudo ln -s /usr/bin/docker/containerd /usr/bin/containerd
-      sudo ln -s /usr/bin/docker/containerd-shim /usr/bin/containerd-shim
-      sudo ln -s /usr/bin/docker/runc /usr/bin/runc
-      # Create Docker service file
-      sudo tee /etc/systemd/system/docker.service > /dev/null <<EOF
+    if command_exists docker; then
+        echo "Docker is already installed."
+    else
+        echo "Installing Docker..."
+        DISTRO=$(awk -F= '/^NAME/{print $2}' /etc/os-release)
+        if [[ "$DISTRO" == *"SLES"* ]] || [[ "$DISTRO" == *"SUSE"* ]]; then
+            DOCKER_VERSION=$(jq -r '.dockerVersion' configuration/services.json)
+            ARCH=$(uname -m)
+            sudo mkdir -p /usr/bin/docker
+            curl -L https://download.docker.com/linux/static/stable/"${ARCH}"/docker-"${DOCKER_VERSION}".tgz -o docker.tgz
+            sudo tar -xzf docker.tgz -C /usr/bin/docker --strip-components=1
+            rm docker.tgz
+            # Remove existing symbolic links
+            sudo rm -f /usr/bin/docker /usr/bin/dockerd /usr/bin/docker-init /usr/bin/docker-proxy /usr/bin/containerd /usr/bin/containerd-shim /usr/bin/runc
+            # Create new symbolic links
+            sudo ln -s /usr/bin/docker/docker /usr/bin/docker
+            sudo ln -s /usr/bin/docker/dockerd /usr/bin/dockerd
+            sudo ln -s /usr/bin/docker/docker-init /usr/bin/docker-init
+            sudo ln -s /usr/bin/docker/docker-proxy /usr/bin/docker-proxy
+            sudo ln -s /usr/bin/docker/containerd /usr/bin/containerd
+            sudo ln -s /usr/bin/docker/containerd-shim /usr/bin/containerd-shim
+            sudo ln -s /usr/bin/docker/runc /usr/bin/runc
+            # Create Docker service file
+            sudo tee /etc/systemd/system/docker.service > /dev/null <<EOF
 [Unit]
 Description=Docker Application Container Engine
 Documentation=https://docs.docker.com
@@ -156,26 +157,28 @@ Restart=always
 [Install]
 WantedBy=multi-user.target
 EOF
-      sudo systemctl daemon-reload
-      sudo systemctl enable docker
-      sudo systemctl start docker
-    elif [[ "$DISTRO" == *"Ubuntu"* ]] || [[ "$DISTRO" == *"Debian"* ]] || [[ "$DISTRO" == *"CentOS"* ]]; then
-      if ! curl -fsSL https://get.docker.com -o get-docker.sh; then
-        echo "Failed to download Docker installation script."
-        exit 1
-      fi
-      if ! sudo sh get-docker.sh; then
-        echo "Failed to install Docker."
-        exit 1
-      fi
-    else
-      echo "Unsupported Linux distribution. This script supports Ubuntu, CentOS, SLES, and SUSE."
-      exit 1
+            sudo systemctl daemon-reload
+            sudo systemctl enable docker
+            sudo systemctl start docker
+        elif [[ "$DISTRO" == *"Ubuntu"* ]] || [[ "$DISTRO" == *"CentOS"* ]]; then
+            if ! curl -fsSL https://get.docker.com -o get-docker.sh; then
+                echo "Failed to download Docker installation script."
+                exit 1
+            fi
+            if ! sudo sh get-docker.sh; then
+                echo "Failed to install Docker."
+                exit 1
+            fi
+        else
+            echo "Unsupported Linux distribution. This script supports Ubuntu, CentOS, SLES, and SUSE."
+            exit 1
+        fi
+        sudo usermod -aG docker "$USER"
+        newgrp docker <<EONG
+        sudo systemctl enable docker
+        sudo systemctl start docker
+EONG
     fi
-    sudo usermod -aG docker "$USER"
-    sudo systemctl enable docker
-    sudo systemctl start docker
-  fi
 }
 
 # Install k3d
