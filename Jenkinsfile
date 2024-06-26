@@ -1,5 +1,5 @@
 pipeline {
-    agent { label "34.29.155.60" }  // replace "gce-instance-label" with the label of your instance template
+    agent { label "35.202.136.86" }  // replace "gce-instance-label" with the label of your instance template
 
     environment {
         ROOT_DIR = "/root"
