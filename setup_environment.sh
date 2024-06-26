@@ -46,24 +46,24 @@ install_jq_alpine() {
 OS=$(uname -s)
 
 # Install jq based on the operating system
-if [ "$OS" == "Linux" ]; then
-  DISTRO=$(awk -F= '/^NAME/{print $2}' /etc/os-release)
-  if [[ "$DISTRO" == *"Ubuntu"* ]] || [[ "$DISTRO" == *"Debian"* ]]; then
-    install_jq_debian_based
-  elif [[ "$DISTRO" == *"CentOS"* ]]; then
-    install_jq_centos
-  elif [[ "$DISTRO" == *"SLES"* ]] || [[ "$DISTRO" == *"SUSE"* ]]; then
-    install_jq_sles
-  elif [[ "$DISTRO" == *"Alpine"* ]]; then
-    install_jq_alpine
-  else
-    echo "Unsupported Linux distribution. This script supports Ubuntu, CentOS, SLES, SUSE, and Alpine."
-    exit 1
-  fi
-else
-  echo "Unsupported operating system. This script supports Linux."
-  exit 1
-fi
+#if [ "$OS" == "Linux" ]; then
+#  DISTRO=$(awk -F= '/^NAME/{print $2}' /etc/os-release)
+#  if [[ "$DISTRO" == *"Ubuntu"* ]] || [[ "$DISTRO" == *"Debian"* ]]; then
+#    install_jq_debian_based
+#  elif [[ "$DISTRO" == *"CentOS"* ]]; then
+#    install_jq_centos
+#  elif [[ "$DISTRO" == *"SLES"* ]] || [[ "$DISTRO" == *"SUSE"* ]]; then
+#    install_jq_sles
+#  elif [[ "$DISTRO" == *"Alpine"* ]]; then
+#    install_jq_alpine
+#  else
+#    echo "Unsupported Linux distribution. This script supports Ubuntu, CentOS, SLES, SUSE, and Alpine."
+#    exit 1
+#  fi
+#else
+#  echo "Unsupported operating system. This script supports Linux."
+#  exit 1
+#fi
 
 
 # Function to install a specific version of Python
