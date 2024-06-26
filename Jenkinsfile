@@ -12,7 +12,10 @@ pipeline {
     stages {
         stage('Build') {
             steps {
-                sh 'make setup'
+                 echo "Starting Git operations"
+                 // Clone all branches of the repository
+                 git url: 'https://github.com/prasanthpy36/test_automation.git', credentialsId: 'prasanthpy36', branch: '**'
+                 sh 'make setup'
             }
         }
         stage('Tests') {
