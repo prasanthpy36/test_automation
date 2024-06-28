@@ -1,36 +1,61 @@
 pipeline {
-    agent { label "35.202.136.86" }  // replace "gce-instance-label" with the label of your instance template
-
-    environment {
-        ROOT_DIR = "/root"
-    }
-    options {
-        disableConcurrentBuilds()
-        timeout(time: 40, unit: 'MINUTES')
-        buildDiscarder(logRotator(numToKeepStr: '5'))
-    }
+    agent any
     stages {
-        stage('Build') {
+        stage('Provision VM') {
             steps {
-                 echo "Starting Git operations"
-                 // Clone all branches of the repository
-//                  git url: 'https://github.com/prasanthpy36/test_automation.git', credentialsId: 'prasanthpy36', branch: '**'
-                 sh 'make setup'
+                script {
+                    googleComputeEngineInstanceCreate(
+                        projectId: 'noble-resolver-421403',
+                        zone: 'us-central1-a',
+                        instanceConfiguration: 'google-cloud-jenkins'
+                    )
+                }
             }
         }
-        stage('Tests') {
+        stage('Initialize Kubernetes Cluster') {
             steps {
-                sh 'make test'
+                script {
+                    sshCommand(remote: [user: 'root', host: 'VM_IP', identityFile: '/home/prasanthpy36', allowAnyHosts: true], command: '''
+                        sudo apt-get update
+                        sudo apt-get install -y apt-transport-https ca-certificates curl
+                        curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
+                        sudo add-apt-repository "deb https://apt.kubernetes.io/ kubernetes-xenial main"
+                        sudo apt-get update
+                        sudo apt-get install -y kubelet kubeadm kubectl
+                        sudo kubeadm init
+                        mkdir -p $HOME/.kube
+                        sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+                        sudo chown $(id -u):$(id -g) $HOME/.kube/config
+                        kubectl apply -f https://docs.projectcalico.org/v3.14/manifests/calico.yaml
+                    ''')
+                }
             }
         }
-        stage('Archive'){
-            steps{
-                archiveArtifacts artifacts: 'test_report.txt', onlyIfSuccessful: true
+        stage('Deploy DTM Services') {
+            steps {
+                script {
+                    // Deploy services to Kubernetes
+                    sh 'kubectl apply -f your-kubernetes-manifests.yaml'
+                }
             }
         }
-        stage('Clear') {
+        stage('Test Services') {
             steps {
-                sh 'make clean'
+                script {
+                    // Test DTM services
+                    sh 'kubectl get pods'
+                }
+            }
+        }
+        stage('Cleanup') {
+            steps {
+                script {
+                    googleComputeEngineInstanceDelete(
+                        projectId: 'your-google-cloud-project-id',
+                        zone: 'us-central1-a',
+                        instanceName: 'google-cloud-jenkins'
+                    )
+                }
             }
         }
     }
