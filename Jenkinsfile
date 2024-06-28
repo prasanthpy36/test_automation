@@ -2,21 +2,20 @@ pipeline {
     agent any
     environment {
         CLOUDSDK_CORE_PROJECT = 'noble-resolver-421403'
-        GCLOUD_CREDS = 'google-cloud' // Ensure this matches your credentials ID
-        SSH_USER = 'root' // Replace with your SSH username
+        GCLOUD_CREDS = credentials('google-cloud') // Ensure this matches your credentials ID in Jenkins
+        SSH_USER = 'root' // Replace with your local system username
         ZONE = 'us-central1-a'
         MACHINE_TYPE = 'n1-standard-1'
         INSTANCE_PREFIX = 'jenkins-vm-instance' // Prefix for instance names
+        PRIVATE_KEY_PATH = '/root/.ssh/id_rsa' // Replace with the actual path to your private key
     }
     stages {
         stage('Provision VM') {
             steps {
                 script {
-                    // Generate a unique instance name
                     INSTANCE_NAME = "${INSTANCE_PREFIX}-${env.BUILD_ID}"
                     echo "Creating VM with name: ${INSTANCE_NAME}"
 
-                    // Create the VM
                     sh """
                         gcloud auth activate-service-account --key-file=\$GCLOUD_CREDS
                         gcloud compute instances create ${INSTANCE_NAME} \
@@ -33,7 +32,6 @@ pipeline {
                                 sudo apt-get install -y kubelet kubeadm kubectl'
                     """
 
-                    // Get the external IP address of the new instance
                     INSTANCE_IP = sh(script: "gcloud compute instances describe ${INSTANCE_NAME} --zone=${ZONE} --format='get(networkInterfaces[0].accessConfigs[0].natIP)'", returnStdout: true).trim()
                     echo "Instance IP: ${INSTANCE_IP}"
                 }
@@ -43,7 +41,7 @@ pipeline {
             steps {
                 script {
                     echo 'Initializing Kubernetes Cluster...'
-                    sshCommand(remote: [user: SSH_USER, host: INSTANCE_IP, identityFile: '/path/to/your/private/key', allowAnyHosts: true], command: '''
+                    sshCommand(remote: [user: SSH_USER, host: INSTANCE_IP, identityFile: PRIVATE_KEY_PATH, allowAnyHosts: true], command: '''
                         sudo kubeadm init
                         mkdir -p $HOME/.kube
                         sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
@@ -58,7 +56,7 @@ pipeline {
             steps {
                 script {
                     echo 'Deploying DTM Services...'
-                    sshCommand(remote: [user: SSH_USER, host: INSTANCE_IP, identityFile: '/path/to/your/private/key', allowAnyHosts: true], command: '''
+                    sshCommand(remote: [user: SSH_USER, host: INSTANCE_IP, identityFile: PRIVATE_KEY_PATH, allowAnyHosts: true], command: '''
                         kubectl apply -f /path/to/your/kubernetes-manifests.yaml
                     ''')
                     echo 'DTM Services deployed.'
@@ -69,7 +67,7 @@ pipeline {
             steps {
                 script {
                     echo 'Testing DTM Services...'
-                    sshCommand(remote: [user: SSH_USER, host: INSTANCE_IP, identityFile: '/path/to/your/private/key', allowAnyHosts: true], command: '''
+                    sshCommand(remote: [user: SSH_USER, host: INSTANCE_IP, identityFile: PRIVATE_KEY_PATH, allowAnyHosts: true], command: '''
                         kubectl get pods
                     ''')
                     echo 'DTM Services tested.'
