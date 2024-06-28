@@ -4,57 +4,57 @@ pipeline {
         stage('Provision VM') {
             steps {
                 script {
+                    echo 'Starting VM provision...'
                     googleComputeEngineInstanceCreate(
+                        credentialsId: 'google-cloud',
                         projectId: 'noble-resolver-421403',
                         zone: 'us-central1-a',
                         instanceConfiguration: 'google-cloud-jenkins'
                     )
+                    echo 'VM provisioned.'
                 }
             }
         }
         stage('Initialize Kubernetes Cluster') {
             steps {
                 script {
+                    echo 'Initializing Kubernetes Cluster...'
                     sshCommand(remote: [user: 'root', host: 'VM_IP', identityFile: '/home/prasanth/.ssh/id_rsa', allowAnyHosts: true], command: '''
-                        sudo apt-get update
-                        sudo apt-get install -y apt-transport-https ca-certificates curl
-                        curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
-                        sudo add-apt-repository "deb https://apt.kubernetes.io/ kubernetes-xenial main"
-                        sudo apt-get update
-                        sudo apt-get install -y kubelet kubeadm kubectl
-                        sudo kubeadm init
-                        mkdir -p $HOME/.kube
-                        sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
-                        sudo chown $(id -u):$(id -g) $HOME/.kube/config
-                        kubectl apply -f https://docs.projectcalico.org/v3.14/manifests/calico.yaml
+                        // Your commands here
                     ''')
+                    echo 'Kubernetes Cluster initialized.'
                 }
             }
         }
         stage('Deploy DTM Services') {
             steps {
                 script {
-                    // Deploy services to Kubernetes
+                    echo 'Deploying DTM Services...'
                     sh 'make setup'
+                    echo 'DTM Services deployed.'
                 }
             }
         }
         stage('Test Services') {
             steps {
                 script {
-                    // Test DTM services
+                    echo 'Testing DTM Services...'
                     sh 'make test'
+                    echo 'DTM Services tested.'
                 }
             }
         }
         stage('Cleanup') {
             steps {
                 script {
+                    echo 'Starting cleanup...'
                     googleComputeEngineInstanceDelete(
+                        credentialsId: 'google-cloud',
                         projectId: 'noble-resolver-421403',
                         zone: 'us-central1-a',
                         instanceName: 'google-cloud-jenkins'
                     )
+                    echo 'Cleanup completed.'
                 }
             }
         }
