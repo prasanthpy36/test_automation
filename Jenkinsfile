@@ -15,7 +15,7 @@ pipeline {
         stage('Initialize Kubernetes Cluster') {
             steps {
                 script {
-                    sshCommand(remote: [user: 'root', host: 'VM_IP', identityFile: '/home/prasanthpy36', allowAnyHosts: true], command: '''
+                    sshCommand(remote: [user: 'root', host: 'VM_IP', identityFile: '/home/prasanth/.ssh/id_rsa', allowAnyHosts: true], command: '''
                         sudo apt-get update
                         sudo apt-get install -y apt-transport-https ca-certificates curl
                         curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
