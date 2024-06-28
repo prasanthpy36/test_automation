@@ -23,6 +23,7 @@ pipeline {
                             --zone=${ZONE} \
                             --machine-type=${MACHINE_TYPE} \
                             --image-family=ubuntu-2004-lts --image-project=ubuntu-os-cloud \
+                            --metadata-from-file ssh-keys=${PRIVATE_KEY_PATH}.pub \
                             --metadata=startup-script='#!/bin/bash
                                 sudo apt-get update
                                 sudo apt-get install -y apt-transport-https ca-certificates curl
