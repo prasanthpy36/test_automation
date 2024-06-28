@@ -35,7 +35,7 @@ pipeline {
             steps {
                 script {
                     // Deploy services to Kubernetes
-                    sh 'kubectl apply -f your-kubernetes-manifests.yaml'
+                    sh 'make setup'
                 }
             }
         }
@@ -43,7 +43,7 @@ pipeline {
             steps {
                 script {
                     // Test DTM services
-                    sh 'kubectl get pods'
+                    sh 'make test'
                 }
             }
         }
