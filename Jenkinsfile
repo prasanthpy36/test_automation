@@ -51,7 +51,7 @@ pipeline {
             steps {
                 script {
                     googleComputeEngineInstanceDelete(
-                        projectId: 'your-google-cloud-project-id',
+                        projectId: 'noble-resolver-421403',
                         zone: 'us-central1-a',
                         instanceName: 'google-cloud-jenkins'
                     )
