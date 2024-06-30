@@ -48,7 +48,7 @@ pipeline {
                             ssh -o StrictHostKeyChecking=no ${SSH_USER}@${INSTANCE_IP} << EOF
                                 git clone -b ${env.GIT_BRANCH} ${REPO_URL}
                                 cd test_automation # Change this to your repository's directory
-                                make # Assuming 'make install' is the target for your installations
+                                make all # Assuming 'make install' is the target for your installations
                             EOF
                         """
                     }
