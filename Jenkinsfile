@@ -69,6 +69,8 @@ pipeline {
                     }
                     echo 'DTM Services tested.'
                 }
+                // Archive the test report
+                archiveArtifacts artifacts: 'test_report.txt', fingerprint: true
             }
         }
         stage('Cleanup') {
