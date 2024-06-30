@@ -175,7 +175,7 @@ EOF
         fi
         sudo usermod -aG docker "$USER"
         sudo systemctl enable docker
-        sudo systemctl start docker
+        sudo systemctl restart docker
     fi
 }
 
