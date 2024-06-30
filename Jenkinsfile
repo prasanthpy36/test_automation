@@ -4,7 +4,7 @@ pipeline {
         CLOUDSDK_CORE_PROJECT = 'noble-resolver-421403'
         GCLOUD_CREDS = credentials('google-cloud') // Ensure this matches your credentials ID in Jenkins
         SSH_USER = 'prasanthpy36' // Replace with your local system username
-        ZONE = 'europe-west2-a' // Change to another zone
+        ZONE = 'us-east1-b' // Change to another zone
         MACHINE_TYPE = 'n1-standard-1'
         INSTANCE_PREFIX = 'jenkins-vm-instance' // Prefix for instance names
         PRIVATE_KEY_CREDENTIALS_ID = '210402b2-9cf5-4c1b-a3e9-679ff4b02925' // Replace with your actual SSH key credentials ID
