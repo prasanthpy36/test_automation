@@ -3,7 +3,7 @@ GENERATED_DIR := services/processed
 TEST_REPORT := test_report.txt
 
 # Default target
-setup: create-docker-containers #create-clusters generate-yamls deploy wait-for-pods
+setup: install-tools create-docker-containers #create-clusters generate-yamls deploy wait-for-pods
 all: setup test
 
 # Target to install tools
