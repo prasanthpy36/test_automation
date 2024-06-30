@@ -198,7 +198,7 @@ install_k3d() {
 install_docker
 install_kubectl
 install_k3d
-#install_python
+install_python
 install_python_packages
 
 # Verify installations
