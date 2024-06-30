@@ -3,11 +3,12 @@ pipeline {
     environment {
         CLOUDSDK_CORE_PROJECT = 'noble-resolver-421403'
         GCLOUD_CREDS = credentials('google-cloud') // Ensure this matches your credentials ID in Jenkins
-        SSH_USER = 'root' // Replace with your local system username
-        ZONE = 'us-central1-a'
+        SSH_USER = 'prasanthpy36' // Replace with your local system username
+        ZONE = 'us-west1-a' // Change to another zone
         MACHINE_TYPE = 'n1-standard-1'
         INSTANCE_PREFIX = 'jenkins-vm-instance' // Prefix for instance names
-        PRIVATE_KEY_PATH = '/root/.ssh/id_rsa' // Replace with the actual path to your private key
+        PRIVATE_KEY_CREDENTIALS_ID = 'prasanthpy36' // Replace with your actual SSH key credentials ID
+        REPO_URL = 'https://github.com/prasanthpy36/test_automation.git' // Replace with your repository URL
     }
     stages {
         stage('Provision VM') {
@@ -23,14 +24,9 @@ pipeline {
                             --zone=${ZONE} \
                             --machine-type=${MACHINE_TYPE} \
                             --image-family=ubuntu-2004-lts --image-project=ubuntu-os-cloud \
-                            --metadata-from-file ssh-keys=${PRIVATE_KEY_PATH}.pub \
                             --metadata=startup-script='#!/bin/bash
                                 sudo apt-get update
-                                sudo apt-get install -y apt-transport-https ca-certificates curl
-                                sudo curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
-                                sudo apt-add-repository "deb http://apt.kubernetes.io/ kubernetes-xenial main"
-                                sudo apt-get update
-                                sudo apt-get install -y kubelet kubeadm kubectl'
+                                sudo apt-get install -y apt-transport-https ca-certificates curl git make'
                     """
 
                     INSTANCE_IP = sh(script: "gcloud compute instances describe ${INSTANCE_NAME} --zone=${ZONE} --format='get(networkInterfaces[0].accessConfigs[0].natIP)'", returnStdout: true).trim()
@@ -38,29 +34,20 @@ pipeline {
                 }
             }
         }
-        stage('Initialize Kubernetes Cluster') {
+        stage('Clone Repository and Run Make') {
             steps {
                 script {
-                    echo 'Initializing Kubernetes Cluster...'
-                    sshCommand(remote: [user: SSH_USER, host: INSTANCE_IP, identityFile: PRIVATE_KEY_PATH, allowAnyHosts: true], command: '''
-                        sudo kubeadm init
-                        mkdir -p $HOME/.kube
-                        sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
-                        sudo chown $(id -u):$(id -g) $HOME/.kube/config
-                        kubectl apply -f https://docs.projectcalico.org/v3.14/manifests/calico.yaml
-                    ''')
-                    echo 'Kubernetes Cluster initialized.'
-                }
-            }
-        }
-        stage('Deploy DTM Services') {
-            steps {
-                script {
-                    echo 'Deploying DTM Services...'
-                    sshCommand(remote: [user: SSH_USER, host: INSTANCE_IP, identityFile: PRIVATE_KEY_PATH, allowAnyHosts: true], command: '''
-                        kubectl apply -f /path/to/your/kubernetes-manifests.yaml
-                    ''')
-                    echo 'DTM Services deployed.'
+                    echo 'Cloning repository and running make command...'
+                    sshagent(['prasanthpy36']) {
+                        sh """
+                            ssh -o StrictHostKeyChecking=no ${SSH_USER}@${INSTANCE_IP} << EOF
+                                git clone ${REPO_URL}
+                                cd test_automation # Change this to your repository's directory
+                                make # Assuming 'make install' is the target for your installations
+                            EOF
+                        """
+                    }
+                    echo 'Repository cloned and make command executed.'
                 }
             }
         }
@@ -68,9 +55,13 @@ pipeline {
             steps {
                 script {
                     echo 'Testing DTM Services...'
-                    sshCommand(remote: [user: SSH_USER, host: INSTANCE_IP, identityFile: PRIVATE_KEY_PATH, allowAnyHosts: true], command: '''
-                        kubectl get pods
-                    ''')
+                    sshagent(['prasanthpy36']) {
+                        sh """
+                            ssh -o StrictHostKeyChecking=no ${SSH_USER}@${INSTANCE_IP} << EOF
+                                kubectl get pods
+                            EOF
+                        """
+                    }
                     echo 'DTM Services tested.'
                 }
             }
