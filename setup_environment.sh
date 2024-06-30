@@ -176,6 +176,7 @@ EOF
         sudo usermod -aG docker "$USER"
         sudo systemctl enable docker
         sudo systemctl restart docker
+        sudo chmod 666 /var/run/docker.sock
     fi
 }
 
