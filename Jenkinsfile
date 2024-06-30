@@ -48,7 +48,7 @@ pipeline {
                             ssh -o StrictHostKeyChecking=no ${SSH_USER}@${INSTANCE_IP} << EOF
                                 git clone -b ${env.GIT_BRANCH} ${REPO_URL}
                                 cd test_automation # Change this to your repository's directory
-                                make all # Assuming 'make install' is the target for your installations
+                                make # Assuming 'make' is the target for your installations
                             EOF
                         """
                     }
@@ -61,7 +61,7 @@ pipeline {
                 script {
                     echo 'Testing DTM Services...'
                     sshagent(['210402b2-9cf5-4c1b-a3e9-679ff4b02925']) {
-                        sh "ssh -o StrictHostKeyChecking=no ${SSH_USER}@${INSTANCE_IP} 'kubectl get pods'"
+                        sh "ssh -o StrictHostKeyChecking=no ${SSH_USER}@${INSTANCE_IP} 'cd test_automation && make test && kubectl get pods'"
                     }
                     echo 'DTM Services tested.'
                 }
