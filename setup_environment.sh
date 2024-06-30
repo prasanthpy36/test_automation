@@ -198,8 +198,8 @@ install_k3d() {
 install_docker
 install_kubectl
 install_k3d
-#install_python
-#install_python_packages
+install_python
+install_python_packages
 
 # Verify installations
 echo "Verifying installations:"
@@ -207,5 +207,5 @@ docker --version
 kubectl version --client
 k3d version
 jq --version
-#python --version
-#pip3 --version
+python --version
+pip3 --version
