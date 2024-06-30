@@ -62,8 +62,10 @@ pipeline {
                     echo 'Testing DTM Services...'
                     sshagent(['210402b2-9cf5-4c1b-a3e9-679ff4b02925']) {
                         sh "ssh -o StrictHostKeyChecking=no ${SSH_USER}@${INSTANCE_IP} 'cd test_automation && make test && kubectl get pods'"
+                        sh "scp -o StrictHostKeyChecking=no ${SSH_USER}@${INSTANCE_IP}:test_automation/test_report.txt ."
                     }
                     echo 'DTM Services tested.'
+                    sh 'cat test_report.txt'
                 }
                 // Archive the test report
                 archiveArtifacts artifacts: 'test_report.txt', fingerprint: true
