@@ -174,8 +174,10 @@ EOF
             exit 1
         fi
         sudo usermod -aG docker "$USER"
+        newgrp docker
         sudo systemctl enable docker
         sudo systemctl start docker
+        sudo chmod 666 /var/run/docker.sock
     fi
 }
 
