@@ -7,7 +7,7 @@ pipeline {
         ZONE = 'us-west1-a' // Change to another zone
         MACHINE_TYPE = 'n1-standard-1'
         INSTANCE_PREFIX = 'jenkins-vm-instance' // Prefix for instance names
-        PRIVATE_KEY_CREDENTIALS_ID = 'prasanthpy36' // Replace with your actual SSH key credentials ID
+        PRIVATE_KEY_CREDENTIALS_ID = '210402b2-9cf5-4c1b-a3e9-679ff4b02925' // Replace with your actual SSH key credentials ID
         REPO_URL = 'https://github.com/prasanthpy36/test_automation.git' // Replace with your repository URL
     }
     stages {
