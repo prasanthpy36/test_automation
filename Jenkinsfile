@@ -18,8 +18,8 @@ pipeline {
                     echo "Creating VM with name: ${INSTANCE_NAME}"
 
                     sh """
-                        gcloud auth activate-service-account --key-file=\$GCLOUD_CREDS
-                        gcloud compute instances create ${INSTANCE_NAME} \
+                        sudo gcloud auth activate-service-account --key-file=\$GCLOUD_CREDS
+                        sudo gcloud compute instances create ${INSTANCE_NAME} \
                             --project=${CLOUDSDK_CORE_PROJECT} \
                             --zone=${ZONE} \
                             --machine-type=${MACHINE_TYPE} \
