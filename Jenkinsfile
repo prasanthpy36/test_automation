@@ -14,7 +14,7 @@ pipeline {
         stage('Provision VM') {
             steps {
                 script {
-                    INSTANCE_NAME = "${INSTANCE_PREFIX}-${env.BUILD_ID}"
+                    INSTANCE_NAME = "${INSTANCE_PREFIX}-${env.GIT_BRANCH}-${env.BUILD_ID}"
                     echo "Creating VM with name: ${INSTANCE_NAME}"
 
                     sh """
